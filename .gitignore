@@ -3,3 +3,4 @@
 
 .envrc
 .direnv
+compile_commands.json
