@@ -48,6 +48,7 @@
         libxext
         wayland
         libxkbcommon
+        renderdoc
       ]);
 
       shellHook = ''
