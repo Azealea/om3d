@@ -64,6 +64,17 @@ namespace OM3D
 
     void Material::bind() const
     {
+        if (is_opaque() && _double_sided == false)
+        {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glFrontFace(GL_CCW);
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
+        }
+
         switch (_blend_mode)
         {
         case BlendMode::None:
