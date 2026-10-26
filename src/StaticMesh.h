@@ -6,6 +6,8 @@
 #include <graphics.h>
 #include <vector>
 
+#include "BSphere.h"
+
 namespace OM3D
 {
 
@@ -25,6 +27,8 @@ namespace OM3D
         StaticMesh(const MeshData& data);
 
         void draw() const;
+
+        BSphere bSphere;
 
     private:
         TypedBuffer<Vertex> _vertex_buffer;

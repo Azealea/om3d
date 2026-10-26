@@ -6,6 +6,8 @@
 #include <glm/matrix.hpp>
 #include <memory>
 
+#include "Camera.h"
+
 namespace OM3D
 {
 
@@ -21,6 +23,8 @@ namespace OM3D
 
         void set_transform(const glm::mat4& tr);
         const glm::mat4& transform() const;
+        bool is_in_frustum(const glm::vec3& cam_pos,
+                           const Frustum& frustum) const;
 
     private:
         glm::mat4 _transform = glm::mat4(1.0f);

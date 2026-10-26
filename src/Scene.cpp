@@ -110,13 +110,16 @@ namespace OM3D
         _sky_material.set_uniform(HASH("intensity"), _ibl_intensity);
         draw_full_screen_triangle();
 
+        const Frustum frustum = _camera.build_frustum();
+        const glm::vec3 cam_pos = _camera.position();
+
         // Render every object
         {
             // Opaque first
-
             for (const SceneObject& obj : _objects)
             {
-                if (obj.material().is_opaque())
+                if (obj.material().is_opaque()
+                    && obj.is_in_frustum(cam_pos, frustum))
                 {
                     obj.render();
                 }
@@ -125,7 +128,8 @@ namespace OM3D
             // Transparent after
             for (const SceneObject& obj : _objects)
             {
-                if (!obj.material().is_opaque())
+                if (!obj.material().is_opaque()
+                    && obj.is_in_frustum(cam_pos, frustum))
                 {
                     obj.render();
                 }

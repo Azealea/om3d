@@ -2,13 +2,16 @@
 
 #include <glad/gl.h>
 
+#include "BSphere.h"
+
 namespace OM3D
 {
 
     extern bool audit_bindings_before_draw;
 
     StaticMesh::StaticMesh(const MeshData& data)
-        : _vertex_buffer(data.vertices)
+        : bSphere(data.vertices)
+        , _vertex_buffer(data.vertices)
         , _index_buffer(data.indices)
     {}
 
