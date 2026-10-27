@@ -60,8 +60,7 @@ namespace OM3D
             _data = data;
             _byte_size = size;
             _handle = GLHandle(handle.get());
-            ALWAYS_ASSERT(size % sizeof(T) == 0,
-                          "Element size doesn't divide buffer size");
+            ALWAYS_ASSERT(size % sizeof(T) == 0, "Element size doesn't divide buffer size");
         }
     };
 

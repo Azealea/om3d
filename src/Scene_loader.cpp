@@ -47,21 +47,17 @@ namespace OM3D
         }
     }
 
-    static bool decode_attrib_buffer(const tinygltf::Model& gltf,
-                                     const std::string& name,
-                                     const tinygltf::Accessor& accessor,
-                                     Span<Vertex> vertices)
+    static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string& name,
+                                     const tinygltf::Accessor& accessor, Span<Vertex> vertices)
     {
-        const tinygltf::BufferView& buffer =
-            gltf.bufferViews[accessor.bufferView];
+        const tinygltf::BufferView& buffer = gltf.bufferViews[accessor.bufferView];
 
         if (accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
         {
             if (display_gltf_loading_warnings)
             {
-                std::cerr << "Unsupported component type ("
-                          << accessor.componentType << ") for \"" << name
-                          << "\"" << std::endl;
+                std::cerr << "Unsupported component type (" << accessor.componentType << ") for \""
+                          << name << "\"" << std::endl;
             }
             return false;
         }
@@ -70,11 +66,9 @@ namespace OM3D
         const size_t vertex_count = vertices.size();
 
         auto decode_attribs = [&](auto* vertex_elems) {
-            using attrib_type =
-                std::remove_reference_t<decltype(vertex_elems[0])>;
+            using attrib_type = std::remove_reference_t<decltype(vertex_elems[0])>;
             using value_type = typename attrib_type::value_type;
-            static constexpr size_t size =
-                sizeof(attrib_type) / sizeof(value_type);
+            static constexpr size_t size = sizeof(attrib_type) / sizeof(value_type);
 
             const size_t components = component_count(accessor.type);
             const bool normalize = accessor.normalized;
@@ -85,8 +79,8 @@ namespace OM3D
             {
                 if (display_gltf_loading_warnings)
                 {
-                    std::cerr << "Expected VEC" << size << " attribute, got VEC"
-                              << components << std::endl;
+                    std::cerr << "Expected VEC" << size << " attribute, got VEC" << components
+                              << std::endl;
                 }
             }
 
@@ -118,18 +112,16 @@ namespace OM3D
                 u8* out_begin = reinterpret_cast<u8*>(vertex_elems);
 
                 const auto& in_buffer = gltf.buffers[buffer.buffer].data;
-                const u8* in_begin =
-                    in_buffer.data() + buffer.byteOffset + accessor.byteOffset;
+                const u8* in_begin = in_buffer.data() + buffer.byteOffset + accessor.byteOffset;
                 const size_t attrib_size = components * sizeof(value_type);
-                const size_t input_stride =
-                    buffer.byteStride ? buffer.byteStride : attrib_size;
+                const size_t input_stride = buffer.byteStride ? buffer.byteStride : attrib_size;
 
                 for (size_t i = 0; i != accessor.count; ++i)
                 {
                     const u8* attrib = in_begin + i * input_stride;
                     DEBUG_ASSERT(attrib < in_buffer.data() + in_buffer.size());
-                    *reinterpret_cast<attrib_type*>(
-                        out_begin + i * sizeof(Vertex)) = convert(attrib);
+                    *reinterpret_cast<attrib_type*>(out_begin + i * sizeof(Vertex)) =
+                        convert(attrib);
                 }
             }
         };
@@ -158,25 +150,21 @@ namespace OM3D
         {
             if (display_gltf_loading_warnings)
             {
-                std::cerr << "Attribute \"" << name << "\" is not supported"
-                          << std::endl;
+                std::cerr << "Attribute \"" << name << "\" is not supported" << std::endl;
             }
         }
         return true;
     }
 
-    static bool decode_index_buffer(const tinygltf::Model& gltf,
-                                    const tinygltf::Accessor& accessor,
+    static bool decode_index_buffer(const tinygltf::Model& gltf, const tinygltf::Accessor& accessor,
                                     Span<u32> indices)
     {
-        const tinygltf::BufferView& buffer =
-            gltf.bufferViews[accessor.bufferView];
+        const tinygltf::BufferView& buffer = gltf.bufferViews[accessor.bufferView];
 
         auto decode_indices = [&](u32 elem_size, auto convert_index) {
-            const u8* in_buffer = gltf.buffers[buffer.buffer].data.data()
-                + buffer.byteOffset + accessor.byteOffset;
-            const size_t input_stride =
-                buffer.byteStride ? buffer.byteStride : elem_size;
+            const u8* in_buffer =
+                gltf.buffers[buffer.buffer].data.data() + buffer.byteOffset + accessor.byteOffset;
+            const size_t input_stride = buffer.byteStride ? buffer.byteStride : elem_size;
 
             for (size_t i = 0; i != accessor.count; ++i)
             {
@@ -193,16 +181,14 @@ namespace OM3D
 
         case TINYGLTF_PARAMETER_TYPE_SHORT:
         case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
-            decode_indices(2, [](const u8* data) -> u32 {
-                return *reinterpret_cast<const u16*>(data);
-            });
+            decode_indices(
+                2, [](const u8* data) -> u32 { return *reinterpret_cast<const u16*>(data); });
             break;
 
         case TINYGLTF_PARAMETER_TYPE_INT:
         case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
-            decode_indices(4, [](const u8* data) -> u32 {
-                return *reinterpret_cast<const u32*>(data);
-            });
+            decode_indices(
+                4, [](const u8* data) -> u32 { return *reinterpret_cast<const u32*>(data); });
             break;
 
         default:
@@ -232,8 +218,7 @@ namespace OM3D
 
             if (!vertices.size())
             {
-                std::fill_n(std::back_inserter(vertices), accessor.count,
-                            Vertex{});
+                std::fill_n(std::back_inserter(vertices), accessor.count, Vertex{});
             }
             else if (vertices.size() != accessor.count)
             {
@@ -256,8 +241,7 @@ namespace OM3D
 
             if (!indices.size())
             {
-                std::fill_n(std::back_inserter(indices), accessor.count,
-                            u32(0));
+                std::fill_n(std::back_inserter(indices), accessor.count, u32(0));
             }
             else if (indices.size() != accessor.count)
             {
@@ -273,8 +257,7 @@ namespace OM3D
         return { true, MeshData{ std::move(vertices), std::move(indices) } };
     }
 
-    static Result<TextureData> build_texture_data(const tinygltf::Image& image,
-                                                  bool as_sRGB)
+    static Result<TextureData> build_texture_data(const tinygltf::Image& image, bool as_sRGB)
     {
         if (image.bits != 8 && image.pixel_type != TINYGLTF_COMPONENT_TYPE_BYTE
             && image.pixel_type != TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
@@ -291,8 +274,7 @@ namespace OM3D
             break;
 
         case 4:
-            format =
-                as_sRGB ? ImageFormat::RGBA8_sRGB : ImageFormat::RGBA8_UNORM;
+            format = as_sRGB ? ImageFormat::RGBA8_sRGB : ImageFormat::RGBA8_UNORM;
             break;
 
         default:
@@ -304,8 +286,7 @@ namespace OM3D
         std::copy(image.image.begin(), image.image.end(), data.get());
 
         return { true,
-                 TextureData{ std::move(data),
-                              glm::uvec2(image.width, image.height), format } };
+                 TextureData{ std::move(data), glm::uvec2(image.width, image.height), format } };
     }
 
     static glm::mat4 parse_node_matrix(const tinygltf::Node& node)
@@ -328,8 +309,7 @@ namespace OM3D
             rotation[k] = float(node.rotation[k]);
         }
 
-        const glm::tquat<float> q(rotation.w, rotation.x, rotation.y,
-                                  rotation.z);
+        const glm::tquat<float> q(rotation.w, rotation.x, rotation.y, rotation.z);
         return glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(q)
             * glm::scale(glm::mat4(1.0f), scale);
     }
@@ -339,10 +319,9 @@ namespace OM3D
         return glm::mat4(1.0f);
     }
 
-    static void
-    parse_node_transforms(int node_index, const tinygltf::Model& gltf,
-                          std::unordered_map<int, glm::mat4>& node_transforms,
-                          const glm::mat4& parent_transform = base_transform())
+    static void parse_node_transforms(int node_index, const tinygltf::Model& gltf,
+                                      std::unordered_map<int, glm::mat4>& node_transforms,
+                                      const glm::mat4& parent_transform = base_transform())
     {
         const tinygltf::Node& node = gltf.nodes[node_index];
         const glm::mat4 transform = parent_transform * parse_node_matrix(node);
@@ -362,45 +341,36 @@ namespace OM3D
 
         for (size_t i = 0; i < mesh.indices.size(); i += 3)
         {
-            const u32 tri[] = { mesh.indices[i + 0], mesh.indices[i + 1],
-                                mesh.indices[i + 2] };
+            const u32 tri[] = { mesh.indices[i + 0], mesh.indices[i + 1], mesh.indices[i + 2] };
 
             const glm::vec3 edges[] = {
                 mesh.vertices[tri[1]].position - mesh.vertices[tri[0]].position,
                 mesh.vertices[tri[2]].position - mesh.vertices[tri[0]].position
             };
 
-            const glm::vec2 uvs[] = { mesh.vertices[tri[0]].uv,
-                                      mesh.vertices[tri[1]].uv,
+            const glm::vec2 uvs[] = { mesh.vertices[tri[0]].uv, mesh.vertices[tri[1]].uv,
                                       mesh.vertices[tri[2]].uv };
 
             const float dt[] = { uvs[1].y - uvs[0].y, uvs[2].y - uvs[0].y };
 
-            const glm::vec3 tangent =
-                -glm::normalize((edges[0] * dt[1]) - (edges[1] * dt[0]));
-            mesh.vertices[tri[0]].tangent_bitangent_sign +=
-                glm::vec4(tangent, 0.0f);
-            mesh.vertices[tri[1]].tangent_bitangent_sign +=
-                glm::vec4(tangent, 0.0f);
-            mesh.vertices[tri[2]].tangent_bitangent_sign +=
-                glm::vec4(tangent, 0.0f);
+            const glm::vec3 tangent = -glm::normalize((edges[0] * dt[1]) - (edges[1] * dt[0]));
+            mesh.vertices[tri[0]].tangent_bitangent_sign += glm::vec4(tangent, 0.0f);
+            mesh.vertices[tri[1]].tangent_bitangent_sign += glm::vec4(tangent, 0.0f);
+            mesh.vertices[tri[2]].tangent_bitangent_sign += glm::vec4(tangent, 0.0f);
         }
 
         for (Vertex& vert : mesh.vertices)
         {
             const glm::vec3 tangent = vert.tangent_bitangent_sign;
-            vert.tangent_bitangent_sign =
-                glm::vec4(glm::normalize(tangent), 1.0f);
+            vert.tangent_bitangent_sign = glm::vec4(glm::normalize(tangent), 1.0f);
         }
     }
 
-    Result<std::unique_ptr<Scene>>
-    Scene::from_gltf(const std::string& file_name)
+    Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name)
     {
         const double time = program_time();
         DEFER(std::cout << file_name << " loaded in "
-                        << std::round((program_time() - time) * 100.0) / 100.0
-                        << "s" << std::endl);
+                        << std::round((program_time() - time) * 100.0) / 100.0 << "s" << std::endl);
 
         tinygltf::TinyGLTF ctx;
         tinygltf::Model gltf;
@@ -410,9 +380,8 @@ namespace OM3D
             std::string warn;
 
             const bool is_ascii = ends_with(file_name, ".gltf");
-            const bool ok = is_ascii
-                ? ctx.LoadASCIIFromFile(&gltf, &err, &warn, file_name)
-                : ctx.LoadBinaryFromFile(&gltf, &err, &warn, file_name);
+            const bool ok = is_ascii ? ctx.LoadASCIIFromFile(&gltf, &err, &warn, file_name)
+                                     : ctx.LoadBinaryFromFile(&gltf, &err, &warn, file_name);
 
             if (!err.empty())
             {
@@ -420,8 +389,7 @@ namespace OM3D
             }
             if (!warn.empty())
             {
-                std::cerr << "Warning while loading gltf: " << warn
-                          << std::endl;
+                std::cerr << "Warning while loading gltf: " << warn << std::endl;
             }
 
             if (!ok)
@@ -431,8 +399,7 @@ namespace OM3D
         }
 
         std::cout << file_name << " parsed in "
-                  << std::round((program_time() - time) * 100.0) / 100.0 << "s"
-                  << std::endl;
+                  << std::round((program_time() - time) * 100.0) / 100.0 << "s" << std::endl;
 
         auto scene = std::make_unique<Scene>();
 
@@ -468,19 +435,16 @@ namespace OM3D
                     it != node.extensions.end())
                 {
                     const int light_index = it->second.Get("light").Get<int>();
-                    if (light_index < 0
-                        || light_index >= static_cast<int>(gltf.lights.size()))
+                    if (light_index < 0 || light_index >= static_cast<int>(gltf.lights.size()))
                     {
                         continue;
                     }
-                    light_nodes.emplace_back(
-                        std::pair{ node_index, light_index });
+                    light_nodes.emplace_back(std::pair{ node_index, light_index });
                 }
             }
         }
 
-        const std::string emissive_strength_ext_name =
-            "KHR_materials_emissive_strength";
+        const std::string emissive_strength_ext_name = "KHR_materials_emissive_strength";
 
         for (auto [node_index, node_transform] : node_transforms)
         {
@@ -510,8 +474,7 @@ namespace OM3D
                     return { false, {} };
                 }
 
-                if (mesh.value.vertices[0].tangent_bitangent_sign
-                    == glm::vec4(0.0f))
+                if (mesh.value.vertices[0].tangent_bitangent_sign == glm::vec4(0.0f))
                 {
                     compute_tangents(mesh.value);
                 }
@@ -524,23 +487,19 @@ namespace OM3D
                     if (!mat)
                     {
                         const auto& gltf_mat = gltf.materials[prim.material];
-                        const auto& albedo_info =
-                            gltf_mat.pbrMetallicRoughness.baseColorTexture;
+                        const auto& albedo_info = gltf_mat.pbrMetallicRoughness.baseColorTexture;
                         const auto& normal_info = gltf_mat.normalTexture;
                         const auto& metal_rough_info =
-                            gltf_mat.pbrMetallicRoughness
-                                .metallicRoughnessTexture;
+                            gltf_mat.pbrMetallicRoughness.metallicRoughnessTexture;
                         const auto& emissive_info = gltf_mat.emissiveTexture;
 
-                        auto load_texture =
-                            [&](auto texture_info,
-                                bool as_sRGB) -> std::shared_ptr<Texture> {
+                        auto load_texture = [&](auto texture_info,
+                                                bool as_sRGB) -> std::shared_ptr<Texture> {
                             if (texture_info.texCoord != 0)
                             {
                                 std::cerr << "Unsupported texture coordinate "
                                              "channel ("
-                                          << texture_info.texCoord << ")"
-                                          << std::endl;
+                                          << texture_info.texCoord << ")" << std::endl;
                                 return nullptr;
                             }
 
@@ -549,8 +508,7 @@ namespace OM3D
                                 return nullptr;
                             }
 
-                            const int index =
-                                gltf.textures[texture_info.index].source;
+                            const int index = gltf.textures[texture_info.index].source;
                             if (index < 0)
                             {
                                 return nullptr;
@@ -559,30 +517,27 @@ namespace OM3D
                             auto& texture = textures[index];
                             if (!texture)
                             {
-                                if (const auto r = build_texture_data(
-                                        gltf.images[index], as_sRGB);
+                                if (const auto r = build_texture_data(gltf.images[index], as_sRGB);
                                     r.is_ok)
                                 {
-                                    texture =
-                                        std::make_shared<Texture>(r.value);
+                                    texture = std::make_shared<Texture>(r.value);
                                 }
                             }
                             return texture;
                         };
 
-                        const bool opaque = (gltf_mat.alphaMode == "OPAQUE")
-                            || (gltf_mat.alphaMode == "NONE");
+                        const bool opaque =
+                            (gltf_mat.alphaMode == "OPAQUE") || (gltf_mat.alphaMode == "NONE");
                         const bool mask = (gltf_mat.alphaMode == "MASK");
                         const bool alpha_test = !opaque || mask;
 
                         auto albedo = load_texture(albedo_info, true);
                         auto normal = load_texture(normal_info, false);
-                        auto metal_rough =
-                            load_texture(metal_rough_info, false);
+                        auto metal_rough = load_texture(metal_rough_info, false);
                         auto emissive = load_texture(emissive_info, false);
 
-                        mat = std::make_shared<Material>(
-                            Material::textured_pbr_material(alpha_test));
+                        mat =
+                            std::make_shared<Material>(Material::textured_pbr_material(alpha_test));
 
                         if (!opaque && !mask)
                         {
@@ -612,52 +567,43 @@ namespace OM3D
 
                         if (alpha_test)
                         {
-                            mat->set_stored_uniform(
-                                HASH("alpha_cutoff"),
-                                float(gltf_mat.alphaCutoff));
+                            mat->set_stored_uniform(HASH("alpha_cutoff"),
+                                                    float(gltf_mat.alphaCutoff));
                         }
 
                         mat->set_double_sided(gltf_mat.doubleSided);
 
                         mat->set_stored_uniform(
                             HASH("base_color_factor"),
-                            glm::vec3(gltf_mat.pbrMetallicRoughness
-                                          .baseColorFactor[0],
-                                      gltf_mat.pbrMetallicRoughness
-                                          .baseColorFactor[1],
-                                      gltf_mat.pbrMetallicRoughness
-                                          .baseColorFactor[2]));
+                            glm::vec3(gltf_mat.pbrMetallicRoughness.baseColorFactor[0],
+                                      gltf_mat.pbrMetallicRoughness.baseColorFactor[1],
+                                      gltf_mat.pbrMetallicRoughness.baseColorFactor[2]));
 
                         mat->set_stored_uniform(
                             HASH("metal_rough_factor"),
-                            glm::vec2(
-                                gltf_mat.pbrMetallicRoughness.metallicFactor,
-                                gltf_mat.pbrMetallicRoughness.roughnessFactor));
+                            glm::vec2(gltf_mat.pbrMetallicRoughness.metallicFactor,
+                                      gltf_mat.pbrMetallicRoughness.roughnessFactor));
 
                         float emissive_factor = 1.0f;
-                        if (const auto it = gltf_mat.extensions.find(
-                                emissive_strength_ext_name);
+                        if (const auto it = gltf_mat.extensions.find(emissive_strength_ext_name);
                             it != gltf_mat.extensions.end())
                         {
                             emissive_factor =
-                                float(it->second.Get("emissiveStrength")
-                                          .GetNumberAsDouble());
+                                float(it->second.Get("emissiveStrength").GetNumberAsDouble());
                         }
 
-                        mat->set_stored_uniform(
-                            HASH("emissive_factor"),
-                            glm::vec3(gltf_mat.emissiveFactor[0],
-                                      gltf_mat.emissiveFactor[1],
-                                      gltf_mat.emissiveFactor[2])
-                                * emissive_factor);
+                        mat->set_stored_uniform(HASH("emissive_factor"),
+                                                glm::vec3(gltf_mat.emissiveFactor[0],
+                                                          gltf_mat.emissiveFactor[1],
+                                                          gltf_mat.emissiveFactor[2])
+                                                    * emissive_factor);
                     }
 
                     material = mat;
                 }
 
                 auto scene_object =
-                    SceneObject(std::make_shared<StaticMesh>(mesh.value),
-                                std::move(material));
+                    SceneObject(std::make_shared<StaticMesh>(mesh.value), std::move(material));
                 scene_object.set_transform(node_transform);
                 scene->add_object(std::move(scene_object));
             }
@@ -667,9 +613,9 @@ namespace OM3D
         {
             const auto& gltf_light = gltf.lights[light_index];
 
-            const glm::vec3 color = glm::vec3(float(gltf_light.color[0]),
-                                              float(gltf_light.color[1]),
-                                              float(gltf_light.color[2]))
+            const glm::vec3 color =
+                glm::vec3(float(gltf_light.color[0]), float(gltf_light.color[1]),
+                          float(gltf_light.color[2]))
                 * float(gltf_light.intensity);
             ;
 
@@ -683,8 +629,7 @@ namespace OM3D
             else
             {
                 const float intensity = glm::dot(color, glm::vec3(1.0f));
-                light.set_radius(
-                    std::sqrt(intensity * 100.0f)); // Put radius where lum < 1%
+                light.set_radius(std::sqrt(intensity * 100.0f)); // Put radius where lum < 1%
             }
             scene->add_light(light);
         }

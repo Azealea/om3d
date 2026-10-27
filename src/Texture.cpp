@@ -49,11 +49,10 @@ namespace OM3D
         , _texture_type(GL_TEXTURE_2D)
     {
         const ImageFormatGL gl_format = image_format_to_gl(_format);
-        glTextureStorage2D(_handle.get(), mip_levels(_size),
-                           gl_format.internal_format, _size.x, _size.y);
-        glTextureSubImage2D(_handle.get(), 0, 0, 0, _size.x, _size.y,
-                            gl_format.format, gl_format.component_type,
-                            data.data.get());
+        glTextureStorage2D(_handle.get(), mip_levels(_size), gl_format.internal_format, _size.x,
+                           _size.y);
+        glTextureSubImage2D(_handle.get(), 0, 0, 0, _size.x, _size.y, gl_format.format,
+                            gl_format.component_type, data.data.get());
 
         glGenerateTextureMipmap(_handle.get());
 
@@ -71,11 +70,9 @@ namespace OM3D
         , _texture_type(GL_TEXTURE_2D)
     {
         const ImageFormatGL gl_format = image_format_to_gl(_format);
-        glTextureStorage2D(_handle.get(), 1, gl_format.internal_format, _size.x,
-                           _size.y);
+        glTextureStorage2D(_handle.get(), 1, gl_format.internal_format, _size.x, _size.y);
 
-        const GLenum gl_wrap =
-            (wrap == WrapMode::Repeat) ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+        const GLenum gl_wrap = (wrap == WrapMode::Repeat) ? GL_REPEAT : GL_CLAMP_TO_EDGE;
         glTextureParameteri(_handle.get(), GL_TEXTURE_WRAP_R, gl_wrap);
         glTextureParameteri(_handle.get(), GL_TEXTURE_WRAP_S, gl_wrap);
         glTextureParameteri(_handle.get(), GL_TEXTURE_WRAP_T, gl_wrap);
@@ -98,9 +95,8 @@ namespace OM3D
         }
 
         const ImageFormatGL gl_format = image_format_to_gl(cube._format);
-        glTextureStorage2D(
-            cube._handle.get(), std::min(mipmaps, mip_levels(cube._size)),
-            gl_format.internal_format, cube._size.x, cube._size.y);
+        glTextureStorage2D(cube._handle.get(), std::min(mipmaps, mip_levels(cube._size)),
+                           gl_format.internal_format, cube._size.x, cube._size.y);
 
         if (bindless_enabled())
         {
@@ -122,8 +118,7 @@ namespace OM3D
             face_size *= 2;
         }
 
-        Texture cube =
-            empty_cubemap(face_size, ImageFormat::RGBA16_FLOAT, 9999);
+        Texture cube = empty_cubemap(face_size, ImageFormat::RGBA16_FLOAT, 9999);
 
         {
             equirec.bind(0);
@@ -158,10 +153,8 @@ namespace OM3D
 
     void Texture::bind_as_image(u32 index, AccessType access)
     {
-        glBindImageTexture(index, _handle.get(), 0,
-                           texture_type() != GL_TEXTURE_2D, 0,
-                           access_type_to_gl(access),
-                           image_format_to_gl(_format).internal_format);
+        glBindImageTexture(index, _handle.get(), 0, texture_type() != GL_TEXTURE_2D, 0,
+                           access_type_to_gl(access), image_format_to_gl(_format).internal_format);
     }
 
     u64 Texture::bindless_handle() const

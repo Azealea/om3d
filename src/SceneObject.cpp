@@ -9,8 +9,7 @@
 namespace OM3D
 {
 
-    SceneObject::SceneObject(std::shared_ptr<StaticMesh> mesh,
-                             std::shared_ptr<Material> material)
+    SceneObject::SceneObject(std::shared_ptr<StaticMesh> mesh, std::shared_ptr<Material> material)
         : _mesh(std::move(mesh))
         , _material(std::move(material))
     {}
@@ -43,8 +42,7 @@ namespace OM3D
         return _transform;
     }
 
-    static bool above_plane(const glm::vec3& plane_pos,
-                            const glm::vec3& plane_normal,
+    static bool above_plane(const glm::vec3& plane_pos, const glm::vec3& plane_normal,
                             const glm::vec3& center, float radius)
     {
         glm::vec3 between = center - plane_pos;
@@ -52,11 +50,9 @@ namespace OM3D
         return distance >= -radius;
     }
 
-    bool SceneObject::is_in_frustum(const glm::vec3& cam_pos,
-                                    const Frustum& frustum) const
+    bool SceneObject::is_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum) const
     {
-        const glm::vec3 center =
-            glm::vec3(_transform * glm::vec4(_mesh->bSphere.center, 1.0f));
+        const glm::vec3 center = glm::vec3(_transform * glm::vec4(_mesh->bSphere.center, 1.0f));
 
         const float radius = _mesh->bSphere.radius
             * std::max({ glm::length(glm::vec3(_transform[0])),
@@ -64,9 +60,8 @@ namespace OM3D
                          glm::length(glm::vec3(_transform[2])) });
 
         for (const glm::vec3& normal :
-             { frustum._near_normal, frustum._top_normal,
-               frustum._bottom_normal, frustum._right_normal,
-               frustum._left_normal })
+             { frustum._near_normal, frustum._top_normal, frustum._bottom_normal,
+               frustum._right_normal, frustum._left_normal })
         {
             if (!above_plane(cam_pos, normal, center, radius))
             {

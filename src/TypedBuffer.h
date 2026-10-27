@@ -29,8 +29,7 @@ namespace OM3D
 
         BufferMapping<T> map(AccessType access = AccessType::ReadWrite)
         {
-            return BufferMapping<T>(ByteBuffer::map_internal(access),
-                                    byte_size(), handle());
+            return BufferMapping<T>(ByteBuffer::map_internal(access), byte_size(), handle());
         }
     };
 

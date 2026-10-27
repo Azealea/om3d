@@ -31,9 +31,8 @@ namespace OM3D
 
     void Material::set_texture(u32 slot, std::shared_ptr<Texture> tex)
     {
-        if (const auto it =
-                std::find_if(_textures.begin(), _textures.end(),
-                             [&](const auto& t) { return t.first == slot; });
+        if (const auto it = std::find_if(_textures.begin(), _textures.end(),
+                                         [&](const auto& t) { return t.first == slot; });
             it != _textures.end())
         {
             it->second = std::move(tex);
@@ -134,8 +133,7 @@ namespace OM3D
             defines.emplace_back("ALPHA_TEST");
         }
 
-        material._program =
-            Program::from_files("lit.frag", "basic.vert", defines);
+        material._program = Program::from_files("lit.frag", "basic.vert", defines);
 
         material.set_texture(0u, default_white_texture());
         material.set_texture(1u, default_normal_texture());

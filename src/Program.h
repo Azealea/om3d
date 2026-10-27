@@ -16,9 +16,8 @@ namespace OM3D
 {
 
     // all possible uniform types
-    using UniformValue =
-        std::variant<u32, float, glm::vec2, glm::vec3, glm::vec4, glm::mat2,
-                     glm::mat3, glm::mat4, u64>;
+    using UniformValue = std::variant<u32, float, glm::vec2, glm::vec3, glm::vec4, glm::mat2,
+                                      glm::mat3, glm::mat4, u64>;
 
     class Program : NonCopyable
     {
@@ -51,12 +50,10 @@ namespace OM3D
 
         bool is_compute() const;
 
-        static std::shared_ptr<Program>
-        from_file(const std::string& comp,
-                  Span<const std::string> defines = {});
-        static std::shared_ptr<Program>
-        from_files(const std::string& frag, const std::string& vert,
-                   Span<const std::string> defines = {});
+        static std::shared_ptr<Program> from_file(const std::string& comp,
+                                                  Span<const std::string> defines = {});
+        static std::shared_ptr<Program> from_files(const std::string& frag, const std::string& vert,
+                                                   Span<const std::string> defines = {});
 
         void set_uniform(u32 name_hash, u32 value);
         void set_uniform(u32 name_hash, float value);

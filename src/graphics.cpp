@@ -27,19 +27,17 @@ namespace OM3D
 
     bool audit_bindings_before_draw = false;
 
-    void debug_out(GLenum, GLenum type, GLuint, GLenum sev, GLsizei,
-                   const char* msg, const void*)
+    void debug_out(GLenum, GLenum type, GLuint, GLenum sev, GLsizei, const char* msg, const void*)
     {
         if (sev == GL_DEBUG_SEVERITY_NOTIFICATION)
         {
             return;
         }
 
-        const bool is_error = (type == GL_DEBUG_TYPE_ERROR
-                               || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR);
+        const bool is_error =
+            (type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR);
         (is_error ? std::cerr : std::cout)
-            << (sev == GL_DEBUG_SEVERITY_HIGH ? "[GL][HIGH] " : "[GL] ") << msg
-            << std::endl;
+            << (sev == GL_DEBUG_SEVERITY_HIGH ? "[GL][HIGH] " : "[GL] ") << msg << std::endl;
 
         if (is_error)
         {
@@ -100,13 +98,11 @@ namespace OM3D
 
     void init_graphics()
     {
-        ALWAYS_ASSERT(gladLoadGL(glfwGetProcAddress),
-                      "glad initialization failed");
+        ALWAYS_ASSERT(gladLoadGL(glfwGetProcAddress), "glad initialization failed");
 
         std::cout << "OpenGL " << glGetString(GL_VERSION) << " initialized on "
-                  << glGetString(GL_VENDOR) << " " << glGetString(GL_RENDERER)
-                  << " using GLSL " << glGetString(GL_SHADING_LANGUAGE_VERSION)
-                  << std::endl;
+                  << glGetString(GL_VENDOR) << " " << glGetString(GL_RENDERER) << " using GLSL "
+                  << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
         glClearColor(0.5f, 0.7f, 0.8f, 0.0f);
 
@@ -138,11 +134,9 @@ namespace OM3D
         glBindVertexArray(global_vao);
 
         {
-            brdf_lut_texture = Texture(glm::uvec2(256), ImageFormat::RG16_UNORM,
-                                       WrapMode::Clamp);
+            brdf_lut_texture = Texture(glm::uvec2(256), ImageFormat::RG16_UNORM, WrapMode::Clamp);
 
-            std::shared_ptr<Program> brdf_program =
-                Program::from_file("brdf.comp");
+            std::shared_ptr<Program> brdf_program = Program::from_file("brdf.comp");
             DEBUG_ASSERT(brdf_program && brdf_program->is_compute());
 
             brdf_program->bind();
@@ -374,16 +368,14 @@ namespace OM3D
 
         auto get_resource_count = [=](GLenum type) {
             int count = 0;
-            glGetProgramInterfaceiv(current_program, type, GL_ACTIVE_RESOURCES,
-                                    &count);
+            glGetProgramInterfaceiv(current_program, type, GL_ACTIVE_RESOURCES, &count);
             return count;
         };
 
-        auto get_resource_property = [=](GLenum res_type, GLenum property,
-                                         unsigned index) {
+        auto get_resource_property = [=](GLenum res_type, GLenum property, unsigned index) {
             int value = 0;
-            glGetProgramResourceiv(current_program, res_type, index, 1,
-                                   &property, 1, nullptr, &value);
+            glGetProgramResourceiv(current_program, res_type, index, 1, &property, 1, nullptr,
+                                   &value);
             return value;
         };
 
@@ -391,20 +383,17 @@ namespace OM3D
             const int uniform_count = get_resource_count(GL_UNIFORM);
             for (int i = 0; i != uniform_count; ++i)
             {
-                const GLenum type =
-                    get_resource_property(GL_UNIFORM, GL_TYPE, i);
+                const GLenum type = get_resource_property(GL_UNIFORM, GL_TYPE, i);
 
                 if (is_sampler_type(type) || is_image_type(type))
                 {
-                    const int location =
-                        get_resource_property(GL_UNIFORM, GL_LOCATION, i);
+                    const int location = get_resource_property(GL_UNIFORM, GL_LOCATION, i);
 
                     unsigned index = 0;
                     glGetUniformuiv(current_program, location, &index);
                     ALWAYS_ASSERT(
-                        glIsTexture(get_at(is_cube_type(type)
-                                               ? GL_TEXTURE_BINDING_CUBE_MAP
-                                               : GL_TEXTURE_BINDING_2D,
+                        glIsTexture(get_at(is_cube_type(type) ? GL_TEXTURE_BINDING_CUBE_MAP
+                                                              : GL_TEXTURE_BINDING_2D,
                                            index)),
                         "Bound texture is destroyed or invalid");
                 }
@@ -415,16 +404,15 @@ namespace OM3D
             const int block_count = get_resource_count(GL_UNIFORM_BLOCK);
             for (int i = 0; i != block_count; ++i)
             {
-                const unsigned binding = get_resource_property(
-                    GL_UNIFORM_BLOCK, GL_BUFFER_BINDING, i);
+                const unsigned binding =
+                    get_resource_property(GL_UNIFORM_BLOCK, GL_BUFFER_BINDING, i);
 
                 const int buffer = get_at(GL_UNIFORM_BUFFER_BINDING, binding);
                 ALWAYS_ASSERT(buffer && glIsBuffer(buffer),
                               "Bound uniform buffer is destroyed or invalid");
 
                 void* mapping = nullptr;
-                glGetNamedBufferPointerv(buffer, GL_BUFFER_MAP_POINTER,
-                                         &mapping);
+                glGetNamedBufferPointerv(buffer, GL_BUFFER_MAP_POINTER, &mapping);
                 ALWAYS_ASSERT(!mapping, "Uniform buffer is still mapped");
             }
         }
@@ -433,17 +421,15 @@ namespace OM3D
             const int block_count = get_resource_count(GL_SHADER_STORAGE_BLOCK);
             for (int i = 0; i != block_count; ++i)
             {
-                const unsigned binding = get_resource_property(
-                    GL_SHADER_STORAGE_BLOCK, GL_BUFFER_BINDING, i);
+                const unsigned binding =
+                    get_resource_property(GL_SHADER_STORAGE_BLOCK, GL_BUFFER_BINDING, i);
 
-                const int buffer =
-                    get_at(GL_SHADER_STORAGE_BUFFER_BINDING, binding);
+                const int buffer = get_at(GL_SHADER_STORAGE_BUFFER_BINDING, binding);
                 ALWAYS_ASSERT(buffer && glIsBuffer(buffer),
                               "Bound storage buffer is destroyed or invalid");
 
                 void* mapping = nullptr;
-                glGetNamedBufferPointerv(buffer, GL_BUFFER_MAP_POINTER,
-                                         &mapping);
+                glGetNamedBufferPointerv(buffer, GL_BUFFER_MAP_POINTER, &mapping);
                 ALWAYS_ASSERT(!mapping, "Storage buffer is still mapped");
             }
         }

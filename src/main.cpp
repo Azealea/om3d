@@ -109,10 +109,8 @@ void process_inputs(GLFWwindow* window, Camera& camera)
 
         if (movement.length() > 0.0f)
         {
-            const glm::vec3 new_pos =
-                camera.position() + movement * delta_time * speed;
-            camera.set_view(
-                glm::lookAt(new_pos, new_pos + camera.forward(), camera.up()));
+            const glm::vec3 new_pos = camera.position() + movement * delta_time * speed;
+            camera.set_view(glm::lookAt(new_pos, new_pos + camera.forward(), camera.up()));
         }
     }
 
@@ -121,13 +119,11 @@ void process_inputs(GLFWwindow* window, Camera& camera)
         const glm::vec2 delta = glm::vec2(mouse_pos - new_mouse_pos) * 0.01f;
         if (delta.length() > 0.0f)
         {
-            glm::mat4 rot = glm::rotate(glm::mat4(1.0f), delta.x,
-                                        glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 rot = glm::rotate(glm::mat4(1.0f), delta.x, glm::vec3(0.0f, 1.0f, 0.0f));
             rot = glm::rotate(rot, delta.y, camera.right());
-            camera.set_view(glm::lookAt(
-                camera.position(),
-                camera.position() + (glm::mat3(rot) * camera.forward()),
-                (glm::mat3(rot) * camera.up())));
+            camera.set_view(glm::lookAt(camera.position(),
+                                        camera.position() + (glm::mat3(rot) * camera.forward()),
+                                        (glm::mat3(rot) * camera.up())));
         }
     }
 
@@ -145,8 +141,7 @@ void load_envmap(const std::string& filename)
 {
     if (auto res = TextureData::from_file(filename); res.is_ok)
     {
-        envmap =
-            std::make_shared<Texture>(Texture::cubemap_from_equirec(res.value));
+        envmap = std::make_shared<Texture>(Texture::cubemap_from_equirec(res.value));
         scene->set_envmap(envmap);
     }
     else
@@ -170,8 +165,7 @@ void load_scene(const std::string& filename)
     }
 }
 
-std::vector<std::string>
-list_data_files(Span<const std::string> extensions = {})
+std::vector<std::string> list_data_files(Span<const std::string> extensions = {})
 {
     std::vector<std::string> files;
     for (auto&& entry : std::filesystem::directory_iterator(data_path))
@@ -199,8 +193,7 @@ template <typename F>
 bool load_file_window(Span<std::string> files, F&& load_func)
 {
     char buffer[1024] = {};
-    if (ImGui::InputText("Load file", buffer, sizeof(buffer),
-                         ImGuiInputTextFlags_EnterReturnsTrue))
+    if (ImGui::InputText("Load file", buffer, sizeof(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
     {
         load_func(buffer);
         return true;
@@ -262,18 +255,14 @@ void gui(ImGuiRenderer& imgui)
 
             ImGui::Separator();
 
-            ImGui::DragFloat("IBL intensity", &ibl_intensity, 0.01f, 0.0f,
-                             1.0f);
+            ImGui::DragFloat("IBL intensity", &ibl_intensity, 0.01f, 0.0f, 1.0f);
             scene->set_ibl_intensity(ibl_intensity);
 
             ImGui::Separator();
 
-            ImGui::DragFloat("Sun Altitude", &sun_altitude, 0.1f, 0.0f, 90.0f,
-                             "%.0f");
-            ImGui::DragFloat("Sun Azimuth", &sun_azimuth, 0.1f, 0.0f, 360.0f,
-                             "%.0f");
-            ImGui::DragFloat("Sun Intensity", &sun_intensity, 0.05f, 0.0f,
-                             100.0f, "%.1f");
+            ImGui::DragFloat("Sun Altitude", &sun_altitude, 0.1f, 0.0f, 90.0f, "%.0f");
+            ImGui::DragFloat("Sun Azimuth", &sun_azimuth, 0.1f, 0.0f, 360.0f, "%.0f");
+            ImGui::DragFloat("Sun Intensity", &sun_intensity, 0.05f, 0.0f, 100.0f, "%.1f");
             scene->set_sun(sun_altitude, sun_azimuth, glm::vec3(sun_intensity));
 
             ImGui::EndMenu();
@@ -292,8 +281,7 @@ void gui(ImGuiRenderer& imgui)
         }
 
         ImGui::Separator();
-        ImGui::TextUnformatted(
-            reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+        ImGui::TextUnformatted(reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
         ImGui::Separator();
         ImGui::Text("%.2f ms", delta_time * 1000.0f);
@@ -307,8 +295,7 @@ void gui(ImGuiRenderer& imgui)
         {
             ImGui::Separator();
             ImGui::TextColored(error_text_color,
-                               ICON_FA_EXCLAMATION_TRIANGLE
-                               " Bindless textures not supported");
+                               ICON_FA_EXCLAMATION_TRIANGLE " Bindless textures not supported");
         }
         ImGui::EndMainMenuBar();
     }
@@ -321,8 +308,7 @@ void gui(ImGuiRenderer& imgui)
         load_files = list_data_files(extensions);
     }
 
-    if (ImGui::BeginPopup("###openscenepopup",
-                          ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopup("###openscenepopup", ImGuiWindowFlags_AlwaysAutoResize))
     {
         if (load_file_window(load_files, load_scene))
         {
@@ -336,13 +322,11 @@ void gui(ImGuiRenderer& imgui)
     {
         ImGui::OpenPopup("###openenvmappopup");
 
-        const std::array<std::string, 3> extensions = { ".png", ".jpg",
-                                                        ".tga" };
+        const std::array<std::string, 3> extensions = { ".png", ".jpg", ".tga" };
         load_files = list_data_files(extensions);
     }
 
-    if (ImGui::BeginPopup("###openenvmappopup",
-                          ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopup("###openenvmappopup", ImGuiWindowFlags_AlwaysAutoResize))
     {
         if (load_file_window(load_files, load_envmap))
         {
@@ -357,30 +341,24 @@ void gui(ImGuiRenderer& imgui)
         if (ImGui::Begin(ICON_FA_CLOCK " GPU Profiler"))
         {
             const ImGuiTableFlags table_flags = ImGuiTableFlags_SortTristate
-                | ImGuiTableFlags_NoSavedSettings
-                | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV
-                | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg;
+                | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_SizingFixedFit
+                | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg;
 
-            ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt,
-                                  ImVec4(1, 1, 1, 0.01f));
+            ImGui::PushStyleColor(ImGuiCol_TableRowBgAlt, ImVec4(1, 1, 1, 0.01f));
             DEFER(ImGui::PopStyleColor());
 
             if (ImGui::BeginTable("##timetable", 3, table_flags))
             {
-                ImGui::TableSetupColumn("Name",
-                                        ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn("CPU (ms)",
-                                        ImGuiTableColumnFlags_NoResize, 70.0f);
-                ImGui::TableSetupColumn("GPU (ms)",
-                                        ImGuiTableColumnFlags_NoResize, 70.0f);
+                ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("CPU (ms)", ImGuiTableColumnFlags_NoResize, 70.0f);
+                ImGui::TableSetupColumn("GPU (ms)", ImGuiTableColumnFlags_NoResize, 70.0f);
                 ImGui::TableHeadersRow();
 
                 std::vector<u32> indents;
                 for (const auto& zone : retrieve_profile())
                 {
                     auto color_from_time = [](float time) {
-                        const float t =
-                            std::min(time / 0.008f, 1.0f); // 8ms = red
+                        const float t = std::min(time / 0.008f, 1.0f); // 8ms = red
                         return ImVec4(t, 1.0f - t, 0.0f, 1.0f);
                     };
 
@@ -389,13 +367,11 @@ void gui(ImGuiRenderer& imgui)
                     ImGui::TextUnformatted(zone.name.data());
 
                     ImGui::TableSetColumnIndex(1);
-                    ImGui::PushStyleColor(ImGuiCol_Text,
-                                          color_from_time(zone.cpu_time));
+                    ImGui::PushStyleColor(ImGuiCol_Text, color_from_time(zone.cpu_time));
                     ImGui::Text("%.2f", zone.cpu_time * 1000.0f);
 
                     ImGui::TableSetColumnIndex(2);
-                    ImGui::PushStyleColor(ImGuiCol_Text,
-                                          color_from_time(zone.gpu_time));
+                    ImGui::PushStyleColor(ImGuiCol_Text, color_from_time(zone.gpu_time));
                     ImGui::Text("%.2f", zone.gpu_time * 1000.0f);
 
                     ImGui::PopStyleColor(2);
@@ -452,14 +428,11 @@ struct RendererState
 
         if (state.size.x > 0 && state.size.y > 0)
         {
-            state.depth_texture =
-                Texture(size, ImageFormat::Depth32_FLOAT, WrapMode::Clamp);
-            state.lit_hdr_texture =
-                Texture(size, ImageFormat::RGBA16_FLOAT, WrapMode::Clamp);
-            state.tone_mapped_texture =
-                Texture(size, ImageFormat::RGBA8_UNORM, WrapMode::Clamp);
-            state.main_framebuffer = Framebuffer(
-                &state.depth_texture, std::array{ &state.lit_hdr_texture });
+            state.depth_texture = Texture(size, ImageFormat::Depth32_FLOAT, WrapMode::Clamp);
+            state.lit_hdr_texture = Texture(size, ImageFormat::RGBA16_FLOAT, WrapMode::Clamp);
+            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM, WrapMode::Clamp);
+            state.main_framebuffer =
+                Framebuffer(&state.depth_texture, std::array{ &state.lit_hdr_texture });
             state.tone_map_framebuffer =
                 Framebuffer(nullptr, std::array{ &state.tone_mapped_texture });
         }
@@ -501,8 +474,7 @@ int main(int argc, char** argv)
     glfwSwapInterval(1); // Enable vsync
     init_graphics();
 
-    std::unique_ptr<ImGuiRenderer> imgui =
-        std::make_unique<ImGuiRenderer>(window);
+    std::unique_ptr<ImGuiRenderer> imgui = std::make_unique<ImGuiRenderer>(window);
 
     load_default_scene();
 
@@ -512,8 +484,7 @@ int main(int argc, char** argv)
     for (;;)
     {
         glfwPollEvents();
-        if (glfwWindowShouldClose(window)
-            || glfwGetKey(window, GLFW_KEY_ESCAPE))
+        if (glfwWindowShouldClose(window) || glfwGetKey(window, GLFW_KEY_ESCAPE))
         {
             break;
         }
@@ -533,8 +504,7 @@ int main(int argc, char** argv)
 
         update_delta_time();
 
-        if (const auto& io = ImGui::GetIO();
-            !io.WantCaptureMouse && !io.WantCaptureKeyboard)
+        if (const auto& io = ImGui::GetIO(); !io.WantCaptureMouse && !io.WantCaptureKeyboard)
         {
             process_inputs(window, scene->camera());
         }

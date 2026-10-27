@@ -21,8 +21,7 @@ namespace OM3D
 
         static void set(WriteMask mask)
         {
-            glColorMask(mask.color[0], mask.color[1], mask.color[2],
-                        mask.color[3]);
+            glColorMask(mask.color[0], mask.color[1], mask.color[2], mask.color[3]);
             glDepthMask(mask.depth);
         }
 
@@ -52,8 +51,7 @@ namespace OM3D
     {
         if (depth)
         {
-            glNamedFramebufferTexture(_handle.get(), GL_DEPTH_ATTACHMENT,
-                                      depth->_handle.get(), 0);
+            glNamedFramebufferTexture(_handle.get(), GL_DEPTH_ATTACHMENT, depth->_handle.get(), 0);
             _size = depth->size();
         }
 
@@ -62,24 +60,20 @@ namespace OM3D
         for (size_t i = 0; i != count; ++i)
         {
             DEBUG_ASSERT(colors[i]);
-            glNamedFramebufferTexture(_handle.get(),
-                                      GLenum(GL_COLOR_ATTACHMENT0 + i),
+            glNamedFramebufferTexture(_handle.get(), GLenum(GL_COLOR_ATTACHMENT0 + i),
                                       colors[i]->_handle.get(), 0);
             _size = colors[i]->size();
         }
 
-        const GLenum draw_buffers[] = {
-            GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-            GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5,
-            GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7
-        };
-        glNamedFramebufferDrawBuffers(_handle.get(), GLsizei(count),
-                                      draw_buffers);
+        const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1,
+                                        GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+                                        GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5,
+                                        GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
+        glNamedFramebufferDrawBuffers(_handle.get(), GLsizei(count), draw_buffers);
 
-        ALWAYS_ASSERT(
-            glCheckNamedFramebufferStatus(_handle.get(), GL_FRAMEBUFFER)
-                == GL_FRAMEBUFFER_COMPLETE,
-            "Invalid framebuffer");
+        ALWAYS_ASSERT(glCheckNamedFramebufferStatus(_handle.get(), GL_FRAMEBUFFER)
+                          == GL_FRAMEBUFFER_COMPLETE,
+                      "Invalid framebuffer");
     }
 
     Framebuffer::~Framebuffer()

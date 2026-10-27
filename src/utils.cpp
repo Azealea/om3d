@@ -63,8 +63,8 @@ namespace OM3D
     double program_time()
     {
         using Seconds = std::chrono::duration<double>;
-        return std::chrono::duration_cast<Seconds>(
-                   std::chrono::high_resolution_clock::now() - start_time)
+        return std::chrono::duration_cast<Seconds>(std::chrono::high_resolution_clock::now()
+                                                   - start_time)
             .count();
     }
 

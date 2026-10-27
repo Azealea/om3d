@@ -116,8 +116,7 @@ namespace OM3D
 
     TimestampQuery::~TimestampQuery()
     {
-        DEBUG_ASSERT(_state == State::Resolved || _state == State::Ended
-                     || _state == State::None);
+        DEBUG_ASSERT(_state == State::Resolved || _state == State::Ended || _state == State::None);
 
         if (auto handle = _begin.get())
         {

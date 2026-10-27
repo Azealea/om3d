@@ -46,8 +46,7 @@ namespace OM3D
             audit_bindings();
         }
 
-        glDrawElements(GL_TRIANGLES, int(_index_buffer.element_count()),
-                       GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, int(_index_buffer.element_count()), GL_UNSIGNED_INT, nullptr);
     }
 
 } // namespace OM3D

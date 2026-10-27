@@ -16,8 +16,7 @@ namespace OM3D
         auto content = read_text_file(full_path);
         if (!content.is_ok)
         {
-            FATAL((std::string("Unable to read shader: \"") + full_path + '"')
-                      .c_str());
+            FATAL((std::string("Unable to read shader: \"") + full_path + '"').c_str());
         }
 
         bool define_added = false;
@@ -45,8 +44,7 @@ namespace OM3D
                 break;
             }
 
-            const std::string_view full_line =
-                std::string_view(shader).substr(i, endl - i);
+            const std::string_view full_line = std::string_view(shader).substr(i, endl - i);
             std::string_view line = full_line;
             auto trim = [&] {
                 while (!line.empty() && std::isspace(line.front()))
@@ -62,8 +60,7 @@ namespace OM3D
                 trim();
                 if (line.substr(0, 7) == "version")
                 {
-                    shader = shader.substr(0, endl) + add_defines()
-                        + shader.substr(endl);
+                    shader = shader.substr(0, endl) + add_defines() + shader.substr(endl);
                 }
                 else if (line.substr(0, 7) == "include")
                 {
@@ -76,8 +73,7 @@ namespace OM3D
                         const auto end = line.find(delim, 1);
                         if (end != line.size() - 1 || delim != '"')
                         {
-                            FATAL((std::string(
-                                       "Unable to parse shader include: \"")
+                            FATAL((std::string("Unable to parse shader include: \"")
                                    + std::string(full_line) + '"')
                                       .c_str());
                         }
@@ -87,20 +83,17 @@ namespace OM3D
                         if (includes.find(include_file) == includes.end())
                         {
                             includes.insert(include_file);
-                            auto content = read_text_file(
-                                std::string(shader_path) + include_file);
+                            auto content = read_text_file(std::string(shader_path) + include_file);
                             if (!content.is_ok)
                             {
-                                FATAL(
-                                    (std::string("Shader include not found: \"")
-                                     + std::string(full_line) + '"')
-                                        .c_str());
+                                FATAL((std::string("Shader include not found: \"")
+                                       + std::string(full_line) + '"')
+                                          .c_str());
                             }
                             include_content = std::move(content.value);
                         }
 
-                        shader = shader.substr(0, i) + include_content
-                            + shader.substr(endl);
+                        shader = shader.substr(0, i) + include_content + shader.substr(endl);
                         continue;
                     }
                 }
@@ -194,18 +187,16 @@ namespace OM3D
             int discard = 0;
             GLenum type = GL_NONE;
 
-            glGetActiveUniform(_handle.get(), i, sizeof(name), &len, &discard,
-                               &type, name);
+            glGetActiveUniform(_handle.get(), i, sizeof(name), &len, &discard, &type, name);
 
-            _uniform_locations.emplace_back(UniformLocationInfo{
-                str_hash(name), glGetUniformLocation(_handle.get(), name) });
+            _uniform_locations.emplace_back(
+                UniformLocationInfo{ str_hash(name), glGetUniformLocation(_handle.get(), name) });
         }
 
         std::sort(_uniform_locations.begin(), _uniform_locations.end());
-        ALWAYS_ASSERT(
-            std::unique(_uniform_locations.begin(), _uniform_locations.end())
-                == _uniform_locations.end(),
-            "Duplicated uniform hash");
+        ALWAYS_ASSERT(std::unique(_uniform_locations.begin(), _uniform_locations.end())
+                          == _uniform_locations.end(),
+                      "Duplicated uniform hash");
     }
 
     Program::~Program()
@@ -229,8 +220,7 @@ namespace OM3D
     std::shared_ptr<Program> Program::from_file(const std::string& comp,
                                                 Span<const std::string> defines)
     {
-        static std::unordered_map<std::vector<std::string>,
-                                  std::weak_ptr<Program>,
+        static std::unordered_map<std::vector<std::string>, std::weak_ptr<Program>,
                                   CollectionHasher<std::vector<std::string>>>
             loaded;
 
@@ -247,12 +237,10 @@ namespace OM3D
         return program;
     }
 
-    std::shared_ptr<Program>
-    Program::from_files(const std::string& frag, const std::string& vert,
-                        Span<const std::string> defines)
+    std::shared_ptr<Program> Program::from_files(const std::string& frag, const std::string& vert,
+                                                 Span<const std::string> defines)
     {
-        static std::unordered_map<std::vector<std::string>,
-                                  std::weak_ptr<Program>,
+        static std::unordered_map<std::vector<std::string>, std::weak_ptr<Program>,
                                   CollectionHasher<std::vector<std::string>>>
             loaded;
 
@@ -264,8 +252,8 @@ namespace OM3D
         auto program = weak_program.lock();
         if (!program)
         {
-            program = std::make_shared<Program>(read_shader(frag, defines),
-                                                read_shader(vert, defines));
+            program =
+                std::make_shared<Program>(read_shader(frag, defines), read_shader(vert, defines));
             weak_program = program;
         }
         return program;
@@ -273,12 +261,9 @@ namespace OM3D
 
     int Program::find_location(u32 hash)
     {
-        const auto it = std::lower_bound(_uniform_locations.begin(),
-                                         _uniform_locations.end(),
+        const auto it = std::lower_bound(_uniform_locations.begin(), _uniform_locations.end(),
                                          UniformLocationInfo{ hash, 0 });
-        return (it == _uniform_locations.end() || it->name_hash != hash)
-            ? -1
-            : it->location;
+        return (it == _uniform_locations.end() || it->name_hash != hash) ? -1 : it->location;
     }
 
     void Program::set_uniform(u32 name_hash, u32 value)
@@ -317,8 +302,7 @@ namespace OM3D
     {
         if (const int loc = find_location(name_hash); loc >= 0)
         {
-            glProgramUniform4f(_handle.get(), loc, value.x, value.y, value.z,
-                               value.w);
+            glProgramUniform4f(_handle.get(), loc, value.x, value.y, value.z, value.w);
         }
     }
 
@@ -361,9 +345,7 @@ namespace OM3D
 
     void Program::set_uniform(u32 name_hash, const UniformValue& value)
     {
-        std::visit(
-            [name_hash, this](const auto& v) { set_uniform(name_hash, v); },
-            value);
+        std::visit([name_hash, this](const auto& v) { set_uniform(name_hash, v); }, value);
     }
 
 } // namespace OM3D

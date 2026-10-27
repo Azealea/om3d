@@ -10,13 +10,11 @@
 
 namespace OM3D
 {
-    static glm::vec3 farthest_point(const std::vector<Vertex>& points,
-                                    glm::vec3 from)
+    static glm::vec3 farthest_point(const std::vector<Vertex>& points, glm::vec3 from)
     {
-        auto vertex = std::max_element(
-            points.begin(), points.end(), [&](auto const& a, auto const& b) {
-                return glm::distance(a.position, from)
-                    < glm::distance(b.position, from);
+        auto vertex =
+            std::max_element(points.begin(), points.end(), [&](auto const& a, auto const& b) {
+                return glm::distance(a.position, from) < glm::distance(b.position, from);
             });
         return vertex->position;
     }

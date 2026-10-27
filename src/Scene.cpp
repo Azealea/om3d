@@ -8,12 +8,10 @@ namespace OM3D
 
     Scene::Scene()
     {
-        _sky_material.set_program(
-            Program::from_files("sky.frag", "screen.vert"));
+        _sky_material.set_program(Program::from_files("sky.frag", "screen.vert"));
         _sky_material.set_depth_test_mode(DepthTestMode::None);
 
-        _envmap = std::make_shared<Texture>(
-            Texture::empty_cubemap(4, ImageFormat::RGBA8_UNORM));
+        _envmap = std::make_shared<Texture>(Texture::empty_cubemap(4, ImageFormat::RGBA8_UNORM));
     }
 
     void Scene::add_object(SceneObject obj)
@@ -62,8 +60,7 @@ namespace OM3D
         const float alt = glm::radians(altitude);
         const float azi = glm::radians(azimuth);
         // Convert from polar to cartesian
-        _sun_direction =
-            glm::vec3(sin(azi) * cos(alt), sin(alt), cos(azi) * cos(alt));
+        _sun_direction = glm::vec3(sin(azi) * cos(alt), sin(alt), cos(azi) * cos(alt));
         _sun_color = color;
     }
 
@@ -74,8 +71,7 @@ namespace OM3D
         {
             auto mapping = buffer.map(AccessType::WriteOnly);
             mapping[0].camera.view_proj = _camera.view_proj_matrix();
-            mapping[0].camera.inv_view_proj =
-                glm::inverse(_camera.view_proj_matrix());
+            mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
             mapping[0].camera.position = _camera.position();
             mapping[0].point_light_count = u32(_point_lights.size());
             mapping[0].sun_color = _sun_color;
@@ -85,15 +81,14 @@ namespace OM3D
         buffer.bind(BufferUsage::Uniform, 0);
 
         // Fill and bind lights buffer
-        TypedBuffer<shader::PointLight> light_buffer(
-            nullptr, std::max(_point_lights.size(), size_t(1)));
+        TypedBuffer<shader::PointLight> light_buffer(nullptr,
+                                                     std::max(_point_lights.size(), size_t(1)));
         {
             auto mapping = light_buffer.map(AccessType::WriteOnly);
             for (size_t i = 0; i != _point_lights.size(); ++i)
             {
                 const auto& light = _point_lights[i];
-                mapping[i] = { light.position(), light.radius(), light.color(),
-                               0.0f };
+                mapping[i] = { light.position(), light.radius(), light.color(), 0.0f };
             }
         }
         light_buffer.bind(BufferUsage::Storage, 1);
@@ -118,8 +113,7 @@ namespace OM3D
             // Opaque first
             for (const SceneObject& obj : _objects)
             {
-                if (obj.material().is_opaque()
-                    && obj.is_in_frustum(cam_pos, frustum))
+                if (obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))
                 {
                     obj.render();
                 }
@@ -128,8 +122,7 @@ namespace OM3D
             // Transparent after
             for (const SceneObject& obj : _objects)
             {
-                if (!obj.material().is_opaque()
-                    && obj.is_in_frustum(cam_pos, frustum))
+                if (!obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))
                 {
                     obj.render();
                 }

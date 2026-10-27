@@ -15,8 +15,7 @@ namespace OM3D
     public:
         Scene();
 
-        static Result<std::unique_ptr<Scene>>
-        from_gltf(const std::string& file_name);
+        static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
         void render() const;
 
@@ -32,8 +31,7 @@ namespace OM3D
         void set_envmap(std::shared_ptr<Texture> env);
         void set_ibl_intensity(float intensity);
 
-        void set_sun(float altitude, float azimuth,
-                     glm::vec3 color = glm::vec3(1.0f));
+        void set_sun(float altitude, float azimuth, glm::vec3 color = glm::vec3(1.0f));
 
     private:
         std::vector<SceneObject> _objects;

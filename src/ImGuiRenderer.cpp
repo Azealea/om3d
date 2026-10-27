@@ -263,8 +263,8 @@ namespace OM3D
         }
         const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
         fonts->AddFontFromMemoryCompressedTTF(font_awesome_compressed_data,
-                                              font_awesome_compressed_size,
-                                              13.0f, &config, icon_ranges);
+                                              font_awesome_compressed_size, 13.0f, &config,
+                                              icon_ranges);
 
         u8* font_data = nullptr;
         int width = 0;
@@ -304,8 +304,7 @@ namespace OM3D
 
     static void mouse_button_callback(GLFWwindow*, int button, int action, int)
     {
-        ImGui::GetIO().AddMouseButtonEvent(button_to_imgui(button),
-                                           action == GLFW_PRESS);
+        ImGui::GetIO().AddMouseButtonEvent(button_to_imgui(button), action == GLFW_PRESS);
     }
 
     ImGuiRenderer::ImGuiRenderer(GLFWwindow* window)
@@ -349,9 +348,7 @@ namespace OM3D
     {
         const auto now = std::chrono::high_resolution_clock::now();
         const float dt =
-            std::chrono::duration_cast<std::chrono::duration<float>>(now
-                                                                     - _last)
-                .count();
+            std::chrono::duration_cast<std::chrono::duration<float>>(now - _last).count();
         _last = now;
         return dt;
     }
@@ -363,10 +360,8 @@ namespace OM3D
             return;
         }
 
-        const float width =
-            (draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
-        const float height =
-            (draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
+        const float width = (draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
+        const float height = (draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
 
         if (width <= 0.0f || height <= 0.0f)
         {
@@ -376,9 +371,8 @@ namespace OM3D
         const ImVec2 clip_off = draw_data->DisplayPos;
         const ImVec2 clip_scale = draw_data->FramebufferScale;
 
-        _material.set_uniform(
-            HASH("viewport_size"),
-            glm::vec2(draw_data->DisplaySize.x, draw_data->DisplaySize.y));
+        _material.set_uniform(HASH("viewport_size"),
+                              glm::vec2(draw_data->DisplaySize.x, draw_data->DisplaySize.y));
         _material.bind();
 
         glDisable(GL_CULL_FACE);
@@ -387,8 +381,7 @@ namespace OM3D
         DEFER(glDisable(GL_SCISSOR_TEST));
 
         TypedBuffer<ImDrawIdx> index_buffer(nullptr, draw_data->TotalIdxCount);
-        TypedBuffer<ImDrawVert> vertex_buffer(nullptr,
-                                              draw_data->TotalVtxCount);
+        TypedBuffer<ImDrawVert> vertex_buffer(nullptr, draw_data->TotalVtxCount);
 
         {
             auto indices = index_buffer.map(AccessType::WriteOnly);
@@ -424,20 +417,16 @@ namespace OM3D
 
                 ALWAYS_ASSERT(!cmd.UserCallback, "User callback not supported");
 
-                const ImVec2 clip_min(
-                    (cmd.ClipRect.x - clip_off.x) * clip_scale.x,
-                    (cmd.ClipRect.y - clip_off.y) * clip_scale.y);
-                const ImVec2 clip_max(
-                    (cmd.ClipRect.z - clip_off.x) * clip_scale.x,
-                    (cmd.ClipRect.w - clip_off.y) * clip_scale.y);
-                if (!cmd.ElemCount || clip_max.x <= clip_min.x
-                    || clip_max.y <= clip_min.y)
+                const ImVec2 clip_min((cmd.ClipRect.x - clip_off.x) * clip_scale.x,
+                                      (cmd.ClipRect.y - clip_off.y) * clip_scale.y);
+                const ImVec2 clip_max((cmd.ClipRect.z - clip_off.x) * clip_scale.x,
+                                      (cmd.ClipRect.w - clip_off.y) * clip_scale.y);
+                if (!cmd.ElemCount || clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                 {
                     continue;
                 }
 
-                glScissor(int(clip_min.x), int(height - clip_max.y),
-                          int(clip_max.x - clip_min.x),
+                glScissor(int(clip_min.x), int(height - clip_max.y), int(clip_max.x - clip_min.x),
                           int(clip_max.y - clip_min.y));
 
                 if (Texture* tex = static_cast<Texture*>(cmd.TextureId))
@@ -445,12 +434,10 @@ namespace OM3D
                     tex->bind(0);
                 }
 
-                glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(ImDrawVert),
-                                      vertex_offset);
+                glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(ImDrawVert), vertex_offset);
                 glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(ImDrawVert),
                                       vertex_offset + (2 * sizeof(float)));
-                glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, false,
-                                      sizeof(ImDrawVert),
+                glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, false, sizeof(ImDrawVert),
                                       vertex_offset + (4 * sizeof(float)));
 
                 glEnableVertexAttribArray(0);
@@ -460,8 +447,7 @@ namespace OM3D
                 glDisableVertexAttribArray(4);
 
                 glDrawElements(GL_TRIANGLES, cmd.ElemCount,
-                               sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT
-                                                      : GL_UNSIGNED_INT,
+                               sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
                                reinterpret_cast<void*>(drawn_index_offset));
                 drawn_index_offset += cmd.ElemCount * sizeof(ImDrawIdx);
             }
