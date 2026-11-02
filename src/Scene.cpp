@@ -1,6 +1,9 @@
 #include "Scene.h"
 
-#include "Framebuffer.h"
+#include <cmath>
+#include <glm/gtc/matrix_transform.hpp>
+#include <limits>
+
 #include "TypedBuffer.h"
 #include "shader_structs.h"
 
@@ -63,6 +66,50 @@ namespace OM3D
         // Convert from polar to cartesian
         _sun_direction = glm::vec3(sin(azi) * cos(alt), sin(alt), cos(azi) * cos(alt));
         _sun_color = color;
+    }
+
+    BSphere Scene::bounding_sphere() const
+    {
+        glm::vec3 min(std::numeric_limits<float>::max());
+        glm::vec3 max(std::numeric_limits<float>::lowest());
+
+        for (const SceneObject& obj : _objects)
+        {
+            const BSphere sphere = obj.scene_bounding_sphere();
+            min = glm::min(min, sphere.center - sphere.radius);
+            max = glm::max(max, sphere.center + sphere.radius);
+        }
+
+        BSphere result;
+        result.center = (min + max) * 0.5f;
+        result.radius = glm::distance(result.center, max);
+        return result;
+    }
+
+    void Scene::render_shadow_map(Program& program) const
+    {
+        const BSphere sphere = bounding_sphere();
+        const float r = sphere.radius;
+        const glm::vec3 dir = glm::normalize(_sun_direction);
+        const glm::vec3 up =
+            std::abs(dir.y) > 0.99f ? glm::vec3(1.0f, 0.0f, 0.0f) : glm::vec3(0.0f, 1.0f, 0.0f);
+
+        const glm::mat4 view = glm::lookAt(sphere.center + dir * r, sphere.center, up);
+        const glm::mat4 proj = Camera::orthographic(-r, r, -r, r, 0.0f, 2.0f * r);
+
+        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
+        auto mapping = buffer.map(AccessType::WriteOnly);
+        mapping[0].camera.view_proj = proj * view;
+
+        buffer.bind(BufferUsage::Uniform, 0);
+
+        for (const SceneObject& obj : _objects)
+        {
+            if (obj.material().is_opaque())
+            {
+                obj.render(false, &program);
+            }
+        }
     }
 
     void Scene::prerender(Program& program) const

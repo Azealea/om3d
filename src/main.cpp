@@ -436,6 +436,9 @@ struct RendererState
             state.tone_map_framebuffer =
                 Framebuffer(nullptr, std::array{ &state.tone_mapped_texture });
             state.z_prepass_framebuffer = Framebuffer(&state.depth_texture);
+            state.shadow_texture =
+                Texture(glm::uvec2(2048), ImageFormat::Depth32_FLOAT, WrapMode::Clamp);
+            state.shadow_framebuffer = Framebuffer(&state.shadow_texture);
         }
 
         return state;
@@ -446,10 +449,12 @@ struct RendererState
     Texture depth_texture;
     Texture lit_hdr_texture;
     Texture tone_mapped_texture;
+    Texture shadow_texture;
 
     Framebuffer main_framebuffer;
     Framebuffer tone_map_framebuffer;
     Framebuffer z_prepass_framebuffer;
+    Framebuffer shadow_framebuffer;
 };
 
 int main(int argc, char** argv)
@@ -515,6 +520,13 @@ int main(int argc, char** argv)
         // Drawing here and only here at fair price
         {
             PROFILE_GPU("Frame");
+
+            {
+                PROFILE_GPU("Shadow pass");
+
+                renderer.shadow_framebuffer.bind(true, false);
+                scene->render_shadow_map(*z_prepass_program);
+            }
 
             {
                 PROFILE_GPU("Z-prepass");

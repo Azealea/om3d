@@ -50,20 +50,26 @@ namespace OM3D
         return distance >= -radius;
     }
 
-    bool SceneObject::is_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum) const
+    BSphere SceneObject::scene_bounding_sphere() const
     {
-        const glm::vec3 center = glm::vec3(_transform * glm::vec4(_mesh->bSphere.center, 1.0f));
-
-        const float radius = _mesh->bSphere.radius
+        BSphere sphere;
+        sphere.center = glm::vec3(_transform * glm::vec4(_mesh->bSphere.center, 1.0f));
+        sphere.radius = _mesh->bSphere.radius
             * std::max({ glm::length(glm::vec3(_transform[0])),
                          glm::length(glm::vec3(_transform[1])),
                          glm::length(glm::vec3(_transform[2])) });
+        return sphere;
+    }
+
+    bool SceneObject::is_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum) const
+    {
+        const BSphere sphere = scene_bounding_sphere();
 
         for (const glm::vec3& normal :
              { frustum._near_normal, frustum._top_normal, frustum._bottom_normal,
                frustum._right_normal, frustum._left_normal })
         {
-            if (!above_plane(cam_pos, normal, center, radius))
+            if (!above_plane(cam_pos, normal, sphere.center, sphere.radius))
             {
                 return false;
             }

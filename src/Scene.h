@@ -21,6 +21,9 @@ namespace OM3D
 
         void render() const;
         void prerender(Program& program) const;
+        void render_shadow_map(Program& program) const;
+
+        BSphere bounding_sphere() const;
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);

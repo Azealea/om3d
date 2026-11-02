@@ -23,6 +23,7 @@ namespace OM3D
 
         void set_transform(const glm::mat4& tr);
         const glm::mat4& transform() const;
+        BSphere scene_bounding_sphere() const;
         bool is_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum) const;
 
     private:
