@@ -86,7 +86,7 @@ namespace OM3D
         return result;
     }
 
-    void Scene::render_shadow_map(Program& program) const
+    glm::mat4 Scene::sun_view_proj() const
     {
         const BSphere sphere = bounding_sphere();
         const float r = sphere.radius;
@@ -97,10 +97,16 @@ namespace OM3D
         const glm::mat4 view = glm::lookAt(sphere.center + dir * r, sphere.center, up);
         const glm::mat4 proj = Camera::orthographic(-r, r, -r, r, 0.0f, 2.0f * r);
 
-        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
-        auto mapping = buffer.map(AccessType::WriteOnly);
-        mapping[0].camera.view_proj = proj * view;
+        return proj * view;
+    }
 
+    void Scene::render_shadow_map(Program& program) const
+    {
+        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
+        {
+            auto mapping = buffer.map(AccessType::WriteOnly);
+            mapping[0].camera.view_proj = sun_view_proj();
+        }
         buffer.bind(BufferUsage::Uniform, 0);
 
         for (const SceneObject& obj : _objects)
@@ -150,6 +156,7 @@ namespace OM3D
             mapping[0].sun_color = _sun_color;
             mapping[0].sun_dir = glm::normalize(_sun_direction);
             mapping[0].ibl_intensity = _ibl_intensity;
+            mapping[0].sun_view_proj = sun_view_proj();
         }
         buffer.bind(BufferUsage::Uniform, 0);
 

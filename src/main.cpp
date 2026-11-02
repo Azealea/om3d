@@ -437,7 +437,7 @@ struct RendererState
                 Framebuffer(nullptr, std::array{ &state.tone_mapped_texture });
             state.z_prepass_framebuffer = Framebuffer(&state.depth_texture);
             state.shadow_texture =
-                Texture(glm::uvec2(2048), ImageFormat::Depth32_FLOAT, WrapMode::Clamp);
+                Texture(glm::uvec2(2048), ImageFormat::Depth32_FLOAT, WrapMode::Clamp, true);
             state.shadow_framebuffer = Framebuffer(&state.shadow_texture);
         }
 
@@ -539,6 +539,7 @@ int main(int argc, char** argv)
                 PROFILE_GPU("Main pass");
 
                 renderer.main_framebuffer.bind(false, true); // dont clear the depth
+                renderer.shadow_texture.bind(6);
                 scene->render();
             }
 

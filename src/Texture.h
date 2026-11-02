@@ -37,7 +37,8 @@ namespace OM3D
 
         Texture(const TextureData& data);
 
-        Texture(const glm::uvec2& size, ImageFormat format, WrapMode wrap);
+        Texture(const glm::uvec2& size, ImageFormat format, WrapMode wrap,
+                bool depth_compare = false);
 
         static Texture empty_cubemap(u32 size, ImageFormat format, u32 mipmaps = 1);
         static Texture cubemap_from_equirec(const Texture& equirec);

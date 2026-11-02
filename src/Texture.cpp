@@ -63,7 +63,7 @@ namespace OM3D
         }
     }
 
-    Texture::Texture(const glm::uvec2& size, ImageFormat format, WrapMode wrap)
+    Texture::Texture(const glm::uvec2& size, ImageFormat format, WrapMode wrap, bool depth_compare)
         : _handle(create_texture_handle(GL_TEXTURE_2D))
         , _size(size)
         , _format(format)
@@ -76,6 +76,12 @@ namespace OM3D
         glTextureParameteri(_handle.get(), GL_TEXTURE_WRAP_R, gl_wrap);
         glTextureParameteri(_handle.get(), GL_TEXTURE_WRAP_S, gl_wrap);
         glTextureParameteri(_handle.get(), GL_TEXTURE_WRAP_T, gl_wrap);
+
+        if (depth_compare)
+        {
+            glTextureParameteri(_handle.get(), GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+            glTextureParameteri(_handle.get(), GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
+        }
 
         if (bindless_enabled())
         {

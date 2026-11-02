@@ -24,6 +24,7 @@ namespace OM3D
         void render_shadow_map(Program& program) const;
 
         BSphere bounding_sphere() const;
+        glm::mat4 sun_view_proj() const;
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
