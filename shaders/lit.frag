@@ -68,7 +68,11 @@ void main() {
     vec3 acc = texture(in_emissive, in_uv).rgb * emissive_factor;
     acc += eval_ibl(in_envmap, brdf_lut, normal, view_dir, base_color, metallic, roughness) * frame.ibl_intensity;
     {
-        acc += frame.sun_color * eval_brdf(normal, view_dir, frame.sun_dir, base_color, metallic, roughness);
+        const vec4 sun_clip = frame.sun_view_proj * vec4(in_position + frame.sun_dir * frame.sun_bias, 1.0);
+        const vec2 shadow_uv = sun_clip.xy * 0.5 + 0.5;
+        const float shadow = texture(in_shadow_map, vec3(shadow_uv, sun_clip.z));
+
+        acc += shadow * frame.sun_color * eval_brdf(normal, view_dir, frame.sun_dir, base_color, metallic, roughness);
 
         for(uint i = 0; i != frame.point_light_count; ++i) {
             PointLight light = point_lights[i];

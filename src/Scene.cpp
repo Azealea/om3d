@@ -58,6 +58,11 @@ namespace OM3D
         _ibl_intensity = intensity;
     }
 
+    void Scene::set_sun_bias(float bias)
+    {
+        _sun_bias = bias;
+    }
+
     void Scene::set_sun(float altitude, float azimuth, glm::vec3 color)
     {
         // Convert from degrees to radians
@@ -157,6 +162,7 @@ namespace OM3D
             mapping[0].sun_dir = glm::normalize(_sun_direction);
             mapping[0].ibl_intensity = _ibl_intensity;
             mapping[0].sun_view_proj = sun_view_proj();
+            mapping[0].sun_bias = _sun_bias;
         }
         buffer.bind(BufferUsage::Uniform, 0);
 
