@@ -5,3 +5,4 @@ records/
 .envrc
 .direnv
 compile_commands.json
+data

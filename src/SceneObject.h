@@ -17,7 +17,7 @@ namespace OM3D
         SceneObject(std::shared_ptr<StaticMesh> mesh = nullptr,
                     std::shared_ptr<Material> material = nullptr);
 
-        void render() const;
+        void render(bool depth_equal, Program* program_override) const;
 
         const Material& material() const;
 

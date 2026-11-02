@@ -61,8 +61,10 @@ namespace OM3D
         _uniforms.emplace_back(name_hash, std::move(value));
     }
 
-    void Material::bind() const
+    Program& Material::bind(bool depth_equal, Program* program_override) const
     {
+        Program& program_to_run = program_override ? *program_override : *_program;
+
         if (is_opaque() && _double_sided == false)
         {
             glEnable(GL_CULL_FACE);
@@ -86,7 +88,7 @@ namespace OM3D
             break;
         }
 
-        switch (_depth_test_mode)
+        switch (depth_equal ? DepthTestMode::Equal : _depth_test_mode)
         {
         case DepthTestMode::None:
             glDisable(GL_DEPTH_TEST);
@@ -117,10 +119,11 @@ namespace OM3D
 
         for (const auto& [h, v] : _uniforms)
         {
-            _program->set_uniform(h, v);
+            program_to_run.set_uniform(h, v);
         }
 
-        _program->bind();
+        program_to_run.bind();
+        return program_to_run;
     }
 
     Material Material::textured_pbr_material(bool alpha_test)

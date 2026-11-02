@@ -14,15 +14,15 @@ namespace OM3D
         , _material(std::move(material))
     {}
 
-    void SceneObject::render() const
+    void SceneObject::render(bool depth_equal, Program* program_override) const
     {
         if (!_material || !_mesh)
         {
             return;
         }
 
-        _material->set_uniform(HASH("model"), transform());
-        _material->bind();
+        Program& program = _material->bind(depth_equal, program_override);
+        program.set_uniform(HASH("model"), transform());
         _mesh->draw();
     }
 

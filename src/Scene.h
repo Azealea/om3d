@@ -1,11 +1,13 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <Camera.h>
-#include <PointLight.h>
-#include <SceneObject.h>
 #include <memory>
 #include <vector>
+
+#include "Camera.h"
+#include "Framebuffer.h"
+#include "PointLight.h"
+#include "SceneObject.h"
 
 namespace OM3D
 {
@@ -18,6 +20,7 @@ namespace OM3D
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
         void render() const;
+        void prerender(Program& program) const;
 
         void add_object(SceneObject obj);
         void add_light(PointLight obj);

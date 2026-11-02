@@ -48,7 +48,7 @@ namespace OM3D
             _program->set_uniform(FWD(args)...);
         }
 
-        void bind() const;
+        Program& bind(bool depth_equal, Program* program_override) const;
 
         static Material textured_pbr_material(bool alpha_test = false);
 

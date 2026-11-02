@@ -435,6 +435,7 @@ struct RendererState
                 Framebuffer(&state.depth_texture, std::array{ &state.lit_hdr_texture });
             state.tone_map_framebuffer =
                 Framebuffer(nullptr, std::array{ &state.tone_mapped_texture });
+            state.z_prepass_framebuffer = Framebuffer(&state.depth_texture);
         }
 
         return state;
@@ -448,6 +449,7 @@ struct RendererState
 
     Framebuffer main_framebuffer;
     Framebuffer tone_map_framebuffer;
+    Framebuffer z_prepass_framebuffer;
 };
 
 int main(int argc, char** argv)
@@ -478,6 +480,7 @@ int main(int argc, char** argv)
 
     load_default_scene();
 
+    auto z_prepass_program = Program::from_files("zprepass.frag", "basic.vert");
     auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
     RendererState renderer;
 
@@ -509,19 +512,24 @@ int main(int argc, char** argv)
             process_inputs(window, scene->camera());
         }
 
-        // Draw everything
+        // Drawing here and only here at fair price
         {
             PROFILE_GPU("Frame");
 
-            // Render the scene
+            {
+                PROFILE_GPU("Z-prepass");
+
+                renderer.z_prepass_framebuffer.bind(true, false); // clear only depth
+                scene->prerender(*z_prepass_program);
+            }
+
             {
                 PROFILE_GPU("Main pass");
 
-                renderer.main_framebuffer.bind(true, true);
+                renderer.main_framebuffer.bind(false, true); // dont clear the depth
                 scene->render();
             }
 
-            // Apply a tonemap as a full screen pass
             {
                 PROFILE_GPU("Tonemap");
 
@@ -532,7 +540,6 @@ int main(int argc, char** argv)
                 draw_full_screen_triangle();
             }
 
-            // Blit tonemap result to screen
             {
                 PROFILE_GPU("Blit");
                 blit_to_screen(renderer.tone_mapped_texture);
