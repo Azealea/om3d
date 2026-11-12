@@ -70,7 +70,15 @@ void main() {
     {
         const vec4 sun_clip = frame.sun_view_proj * vec4(in_position + frame.sun_dir * frame.sun_bias, 1.0);
         const vec2 shadow_uv = sun_clip.xy * 0.5 + 0.5;
-        const float shadow = texture(in_shadow_map, vec3(shadow_uv, sun_clip.z));
+        const vec2 shadow_texel = 1.0 / vec2(textureSize(in_shadow_map, 0));
+
+        float shadow = 0.0;
+        for(int i = -1; i <= 1; ++i) {
+            for(int j = -1; j <= 1; ++j) {
+                shadow += texture(in_shadow_map, vec3(shadow_uv + vec2(i, j) * shadow_texel, sun_clip.z));
+            }
+        }
+        shadow /= 9.0;
 
         acc += shadow * frame.sun_color * eval_brdf(normal, view_dir, frame.sun_dir, base_color, metallic, roughness);
 

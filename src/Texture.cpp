@@ -81,6 +81,8 @@ namespace OM3D
         {
             glTextureParameteri(_handle.get(), GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
             glTextureParameteri(_handle.get(), GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
+            glTextureParameteri(_handle.get(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(_handle.get(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
 
         if (bindless_enabled())
