@@ -59,6 +59,7 @@ namespace OM3D
         std::shared_ptr<Texture> _envmap;
         float _ibl_intensity = 1.0f;
         Material _sky_material;
+        Material _sun_material;
 
         Camera _camera;
     };

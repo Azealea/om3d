@@ -15,6 +15,10 @@ namespace OM3D
         _sky_material.set_program(Program::from_files("sky.frag", "screen.vert"));
         _sky_material.set_depth_test_mode(DepthTestMode::None);
 
+        _sun_material.set_program(Program::from_files("deferred_lighting.frag", "screen.vert"));
+        _sun_material.set_depth_test_mode(DepthTestMode::None);
+        _sun_material.set_depth_write(false);
+
         _envmap = std::make_shared<Texture>(Texture::empty_cubemap(4, ImageFormat::RGBA8_UNORM));
     }
 
@@ -156,7 +160,7 @@ namespace OM3D
 
         if (pass == RenderPass::Lighting)
         {
-            program->bind();
+            _sun_material.bind(false, nullptr);
             draw_full_screen_triangle();
             return;
         }

@@ -447,7 +447,7 @@ struct RendererState
             state.main_framebuffer =
                 Framebuffer(&state.depth_texture, std::array{ &state.lit_hdr_texture });
             state.lighting_framebuffer =
-                Framebuffer(nullptr, std::array{ &state.lit_hdr_texture });
+                Framebuffer(&state.depth_texture, std::array{ &state.lit_hdr_texture });
             state.tone_map_framebuffer =
                 Framebuffer(nullptr, std::array{ &state.tone_mapped_texture });
             state.z_prepass_framebuffer = Framebuffer(&state.depth_texture);
@@ -524,7 +524,6 @@ int main(int argc, char** argv)
     auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
     auto gbuffer_program = Program::from_files("gbuffer.frag", "basic.vert");
     auto gbuffer_debug_program = Program::from_files("gbuffer_debug.frag", "screen.vert");
-    auto lighting_program = Program::from_files("deferred_lighting.frag", "screen.vert");
     RendererState renderer;
 
     for (;;)
@@ -581,7 +580,7 @@ int main(int argc, char** argv)
                 renderer.gbuffer_normal_metal_texture.bind(1);
                 renderer.depth_texture.bind(2);
                 renderer.shadow_texture.bind(6);
-                scene->render(RenderPass::Lighting, lighting_program.get());
+                scene->render(RenderPass::Lighting, nullptr);
             }
 
             {
@@ -627,7 +626,6 @@ int main(int argc, char** argv)
     tonemap_program = nullptr;
     gbuffer_program = nullptr;
     gbuffer_debug_program = nullptr;
-    lighting_program = nullptr;
     renderer = {};
     destroy_graphics();
 }
