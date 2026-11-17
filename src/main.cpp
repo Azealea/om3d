@@ -441,6 +441,15 @@ struct RendererState
             state.tone_map_framebuffer =
                 Framebuffer(nullptr, std::array{ &state.tone_mapped_texture });
             state.z_prepass_framebuffer = Framebuffer(&state.depth_texture);
+
+            // G-buffer: albedo (sRGB) + roughness, normals + metalness, and the shared depth
+            state.gbuffer_albedo_rough_texture =
+                Texture(size, ImageFormat::RGBA8_sRGB, WrapMode::Clamp);
+            state.gbuffer_normal_metal_texture =
+                Texture(size, ImageFormat::RGBA8_UNORM, WrapMode::Clamp);
+            state.gbuffer_framebuffer =
+                Framebuffer(&state.depth_texture, std::array{ &state.gbuffer_albedo_rough_texture,
+                                                              &state.gbuffer_normal_metal_texture });
             state.shadow_texture =
                 Texture(glm::uvec2(2048), ImageFormat::Depth32_FLOAT, WrapMode::Clamp, true);
             state.shadow_framebuffer = Framebuffer(&state.shadow_texture);
@@ -456,6 +465,10 @@ struct RendererState
     Texture tone_mapped_texture;
     Texture shadow_texture;
 
+    Texture gbuffer_albedo_rough_texture;
+    Texture gbuffer_normal_metal_texture;
+
+    Framebuffer gbuffer_framebuffer;
     Framebuffer main_framebuffer;
     Framebuffer tone_map_framebuffer;
     Framebuffer z_prepass_framebuffer;
