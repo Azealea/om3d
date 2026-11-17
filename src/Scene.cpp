@@ -148,6 +148,29 @@ namespace OM3D
         }
     }
 
+    void Scene::render_gbuffer(Program& program) const
+    {
+        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
+        {
+            auto mapping = buffer.map(AccessType::WriteOnly);
+            mapping[0].camera.view_proj = _camera.view_proj_matrix();
+            mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
+            mapping[0].camera.position = _camera.position();
+        }
+        buffer.bind(BufferUsage::Uniform, 0);
+
+        const Frustum frustum = _camera.build_frustum();
+        const glm::vec3 cam_pos = _camera.position();
+
+        for (const SceneObject& obj : _objects)
+        {
+            if (obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))
+            {
+                obj.render(false, &program);
+            }
+        }
+    }
+
     void Scene::render() const
     {
         // Fill and bind frame data buffer

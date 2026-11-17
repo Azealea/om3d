@@ -505,6 +505,7 @@ int main(int argc, char** argv)
 
     auto z_prepass_program = Program::from_files("zprepass.frag", "basic.vert");
     auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
+    auto gbuffer_program = Program::from_files("gbuffer.frag", "basic.vert");
     RendererState renderer;
 
     for (;;)
@@ -544,6 +545,13 @@ int main(int argc, char** argv)
 
                 renderer.shadow_framebuffer.bind(true, false);
                 scene->render_shadow_map(*z_prepass_program);
+            }
+
+            {
+                PROFILE_GPU("G-buffer pass");
+
+                renderer.gbuffer_framebuffer.bind(true, true);
+                scene->render_gbuffer(*gbuffer_program);
             }
 
             {
@@ -588,6 +596,7 @@ int main(int argc, char** argv)
     envmap = nullptr;
     imgui = nullptr;
     tonemap_program = nullptr;
+    gbuffer_program = nullptr;
     renderer = {};
     destroy_graphics();
 }
