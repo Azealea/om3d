@@ -587,8 +587,20 @@ int main(int argc, char** argv)
             }
 
             {
+                PROFILE_GPU("G-buffer debug");
+
+                renderer.debug_framebuffer.bind(false, true);
+                renderer.gbuffer_albedo_rough_texture.bind(0);
+                renderer.gbuffer_normal_metal_texture.bind(1);
+                renderer.depth_texture.bind(2);
+                gbuffer_debug_program->bind();
+                gbuffer_debug_program->set_uniform(HASH("mode"), u32(0));
+                draw_full_screen_triangle();
+            }
+
+            {
                 PROFILE_GPU("Blit");
-                blit_to_screen(renderer.tone_mapped_texture);
+                blit_to_screen(renderer.debug_texture);
             }
 
             // Draw GUI on top
