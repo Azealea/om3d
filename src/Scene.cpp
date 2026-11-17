@@ -123,7 +123,7 @@ namespace OM3D
     void Scene::render(RenderPass pass, Program* program) const
     {
         const bool lit = pass == RenderPass::Lighting || pass == RenderPass::PointLights
-                         || pass == RenderPass::Forward;
+                         || pass == RenderPass::Transparent || pass == RenderPass::Forward;
 
         TypedBuffer<shader::FrameData> buffer(nullptr, 1);
         {
@@ -220,13 +220,14 @@ namespace OM3D
 
         for (const SceneObject& obj : _objects)
         {
-            if (obj.material().is_opaque() && (!cull || obj.is_in_frustum(cam_pos, frustum)))
+            if (pass != RenderPass::Transparent && obj.material().is_opaque()
+                && (!cull || obj.is_in_frustum(cam_pos, frustum)))
             {
                 obj.render(pass == RenderPass::Forward, program);
             }
         }
 
-        if (pass == RenderPass::Forward)
+        if (pass == RenderPass::Forward || pass == RenderPass::Transparent)
         {
             for (const SceneObject& obj : _objects)
             {

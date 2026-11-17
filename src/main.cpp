@@ -585,6 +585,13 @@ int main(int argc, char** argv)
             }
 
             {
+                PROFILE_GPU("Transparent pass");
+
+                renderer.lighting_framebuffer.bind(false, false);
+                scene->render(RenderPass::Transparent, nullptr);
+            }
+
+            {
                 PROFILE_GPU("Tonemap");
 
                 renderer.tone_map_framebuffer.bind(false, true);

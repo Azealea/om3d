@@ -566,7 +566,8 @@ namespace OM3D
                         if (!opaque && !mask)
                         {
                             mat->set_blend_mode(BlendMode::Alpha);
-                            mat->set_depth_test_mode(DepthTestMode::None);
+                            mat->set_depth_test_mode(DepthTestMode::Standard);
+                            mat->set_depth_write(false);
                         }
 
                         if (albedo)

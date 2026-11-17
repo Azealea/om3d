@@ -19,6 +19,7 @@ namespace OM3D
         GBuffer,
         Lighting,
         PointLights,
+        Transparent,
         Forward,
     };
 
