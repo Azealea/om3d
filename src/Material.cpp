@@ -29,6 +29,11 @@ namespace OM3D
         _double_sided = double_sided;
     }
 
+    void Material::set_depth_write(bool depth_write)
+    {
+        _depth_write = depth_write;
+    }
+
     void Material::set_texture(u32 slot, std::shared_ptr<Texture> tex)
     {
         if (const auto it = std::find_if(_textures.begin(), _textures.end(),
@@ -86,7 +91,14 @@ namespace OM3D
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             break;
+
+        case BlendMode::Additive:
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
         }
+
+        glDepthMask(_depth_write ? GL_TRUE : GL_FALSE);
 
         switch (depth_equal ? DepthTestMode::Equal : _depth_test_mode)
         {

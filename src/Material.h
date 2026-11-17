@@ -13,6 +13,7 @@ namespace OM3D
     {
         None,
         Alpha,
+        Additive,
     };
 
     enum class DepthTestMode
@@ -32,6 +33,7 @@ namespace OM3D
         void set_blend_mode(BlendMode blend);
         void set_depth_test_mode(DepthTestMode depth);
         void set_double_sided(bool double_sided);
+        void set_depth_write(bool depth_write);
         void set_texture(u32 slot, std::shared_ptr<Texture> tex);
 
         bool is_opaque() const;
@@ -60,6 +62,7 @@ namespace OM3D
         BlendMode _blend_mode = BlendMode::None;
         DepthTestMode _depth_test_mode = DepthTestMode::Standard;
         bool _double_sided = false;
+        bool _depth_write = true;
     };
 
 } // namespace OM3D
