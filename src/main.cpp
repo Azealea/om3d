@@ -450,6 +450,10 @@ struct RendererState
             state.gbuffer_framebuffer =
                 Framebuffer(&state.depth_texture, std::array{ &state.gbuffer_albedo_rough_texture,
                                                               &state.gbuffer_normal_metal_texture });
+
+            // Result of the debug shader, copied to the screen afterwards
+            state.debug_texture = Texture(size, ImageFormat::RGBA8_UNORM, WrapMode::Clamp);
+            state.debug_framebuffer = Framebuffer(nullptr, std::array{ &state.debug_texture });
             state.shadow_texture =
                 Texture(glm::uvec2(2048), ImageFormat::Depth32_FLOAT, WrapMode::Clamp, true);
             state.shadow_framebuffer = Framebuffer(&state.shadow_texture);
@@ -467,8 +471,10 @@ struct RendererState
 
     Texture gbuffer_albedo_rough_texture;
     Texture gbuffer_normal_metal_texture;
+    Texture debug_texture;
 
     Framebuffer gbuffer_framebuffer;
+    Framebuffer debug_framebuffer;
     Framebuffer main_framebuffer;
     Framebuffer tone_map_framebuffer;
     Framebuffer z_prepass_framebuffer;
@@ -506,6 +512,7 @@ int main(int argc, char** argv)
     auto z_prepass_program = Program::from_files("zprepass.frag", "basic.vert");
     auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
     auto gbuffer_program = Program::from_files("gbuffer.frag", "basic.vert");
+    auto gbuffer_debug_program = Program::from_files("gbuffer_debug.frag", "screen.vert");
     RendererState renderer;
 
     for (;;)
@@ -597,6 +604,7 @@ int main(int argc, char** argv)
     imgui = nullptr;
     tonemap_program = nullptr;
     gbuffer_program = nullptr;
+    gbuffer_debug_program = nullptr;
     renderer = {};
     destroy_graphics();
 }
