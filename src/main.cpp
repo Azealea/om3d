@@ -276,7 +276,7 @@ void gui(ImGuiRenderer& imgui)
 
         if (ImGui::BeginMenu("G-buffer"))
         {
-            const char* modes[] = { "Depth", "Albedo", "Normal", "Roughness", "Metalness" };
+            const char* modes[] = { "Lit", "Depth", "Albedo", "Normal", "Roughness", "Metalness" };
             ImGui::Combo("Debug view", &gbuffer_debug_mode, modes, IM_ARRAYSIZE(modes));
             ImGui::EndMenu();
         }
@@ -594,6 +594,7 @@ int main(int argc, char** argv)
                 draw_full_screen_triangle();
             }
 
+            if (gbuffer_debug_mode != 0)
             {
                 PROFILE_GPU("G-buffer debug");
 
@@ -602,13 +603,14 @@ int main(int argc, char** argv)
                 renderer.gbuffer_normal_metal_texture.bind(1);
                 renderer.depth_texture.bind(2);
                 gbuffer_debug_program->bind();
-                gbuffer_debug_program->set_uniform(HASH("mode"), u32(gbuffer_debug_mode));
+                gbuffer_debug_program->set_uniform(HASH("mode"), u32(gbuffer_debug_mode - 1));
                 draw_full_screen_triangle();
             }
 
             {
                 PROFILE_GPU("Blit");
-                blit_to_screen(renderer.debug_texture);
+                blit_to_screen(gbuffer_debug_mode != 0 ? renderer.debug_texture
+                                                       : renderer.tone_mapped_texture);
             }
 
             // Draw GUI on top
