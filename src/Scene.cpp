@@ -68,7 +68,7 @@ namespace OM3D
         // Convert from degrees to radians
         const float alt = glm::radians(altitude);
         const float azi = glm::radians(azimuth);
-        // Convert from polar to cartesian
+        // Convert from polar to parmesian (cartesian for the pedantic)
         _sun_direction = glm::vec3(sin(azi) * cos(alt), sin(alt), cos(azi) * cos(alt));
         _sun_color = color;
     }
@@ -105,169 +105,83 @@ namespace OM3D
         return proj * view;
     }
 
-    void Scene::render_shadow_map(Program& program) const
+    void Scene::render(RenderPass pass, Program* program) const
     {
+        const bool lit = pass == RenderPass::Lighting || pass == RenderPass::Forward;
+
         TypedBuffer<shader::FrameData> buffer(nullptr, 1);
         {
             auto mapping = buffer.map(AccessType::WriteOnly);
-            mapping[0].camera.view_proj = sun_view_proj();
-        }
-        buffer.bind(BufferUsage::Uniform, 0);
-
-        for (const SceneObject& obj : _objects)
-        {
-            if (obj.material().is_opaque())
+            if (pass == RenderPass::Shadow)
             {
-                obj.render(false, &program);
+                mapping[0].camera.view_proj = sun_view_proj();
+            }
+            else
+            {
+                mapping[0].camera.view_proj = _camera.view_proj_matrix();
+                mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
+                mapping[0].camera.position = _camera.position();
+            }
+
+            if (lit)
+            {
+                mapping[0].point_light_count = u32(_point_lights.size());
+                mapping[0].sun_color = _sun_color;
+                mapping[0].sun_dir = glm::normalize(_sun_direction);
+                mapping[0].ibl_intensity = _ibl_intensity;
+                mapping[0].sun_view_proj = sun_view_proj();
+                mapping[0].sun_bias = _sun_bias;
             }
         }
-    }
-
-    void Scene::prerender(Program& program) const
-    {
-        // Fill and bind frame data buffer
-        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
-        {
-            auto mapping = buffer.map(AccessType::WriteOnly);
-            mapping[0].camera.view_proj = _camera.view_proj_matrix();
-            mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
-            mapping[0].camera.position = _camera.position();
-        }
         buffer.bind(BufferUsage::Uniform, 0);
 
-        const Frustum frustum = _camera.build_frustum();
-        const glm::vec3 cam_pos = _camera.position();
-
-        // Render every opaque object
-        for (const SceneObject& obj : _objects)
-        {
-            if (obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))
-            {
-                obj.render(false, &program);
-            }
-        }
-    }
-
-    void Scene::render_gbuffer(Program& program) const
-    {
-        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
-        {
-            auto mapping = buffer.map(AccessType::WriteOnly);
-            mapping[0].camera.view_proj = _camera.view_proj_matrix();
-            mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
-            mapping[0].camera.position = _camera.position();
-        }
-        buffer.bind(BufferUsage::Uniform, 0);
-
-        const Frustum frustum = _camera.build_frustum();
-        const glm::vec3 cam_pos = _camera.position();
-
-        for (const SceneObject& obj : _objects)
-        {
-            if (obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))
-            {
-                obj.render(false, &program);
-            }
-        }
-    }
-
-    void Scene::render_lighting(Program& program) const
-    {
-        // Fill and bind frame data buffer
-        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
-        {
-            auto mapping = buffer.map(AccessType::WriteOnly);
-            mapping[0].camera.view_proj = _camera.view_proj_matrix();
-            mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
-            mapping[0].camera.position = _camera.position();
-            mapping[0].point_light_count = u32(_point_lights.size());
-            mapping[0].sun_color = _sun_color;
-            mapping[0].sun_dir = glm::normalize(_sun_direction);
-            mapping[0].ibl_intensity = _ibl_intensity;
-            mapping[0].sun_view_proj = sun_view_proj();
-            mapping[0].sun_bias = _sun_bias;
-        }
-        buffer.bind(BufferUsage::Uniform, 0);
-
-        // Fill and bind lights buffer
         TypedBuffer<shader::PointLight> light_buffer(nullptr,
                                                      std::max(_point_lights.size(), size_t(1)));
+        if (lit)
         {
-            auto mapping = light_buffer.map(AccessType::WriteOnly);
-            for (size_t i = 0; i != _point_lights.size(); ++i)
             {
-                const auto& light = _point_lights[i];
-                mapping[i] = { light.position(), light.radius(), light.color(), 0.0f };
-            }
-        }
-        light_buffer.bind(BufferUsage::Storage, 1);
-
-        DEBUG_ASSERT(_envmap && !_envmap->is_null());
-        _envmap->bind(4);
-        brdf_lut().bind(5);
-
-        program.bind();
-        draw_full_screen_triangle();
-    }
-
-    void Scene::render() const
-    {
-        // Fill and bind frame data buffer
-        TypedBuffer<shader::FrameData> buffer(nullptr, 1);
-        {
-            auto mapping = buffer.map(AccessType::WriteOnly);
-            mapping[0].camera.view_proj = _camera.view_proj_matrix();
-            mapping[0].camera.inv_view_proj = glm::inverse(_camera.view_proj_matrix());
-            mapping[0].camera.position = _camera.position();
-            mapping[0].point_light_count = u32(_point_lights.size());
-            mapping[0].sun_color = _sun_color;
-            mapping[0].sun_dir = glm::normalize(_sun_direction);
-            mapping[0].ibl_intensity = _ibl_intensity;
-            mapping[0].sun_view_proj = sun_view_proj();
-            mapping[0].sun_bias = _sun_bias;
-        }
-        buffer.bind(BufferUsage::Uniform, 0);
-
-        // Fill and bind lights buffer
-        TypedBuffer<shader::PointLight> light_buffer(nullptr,
-                                                     std::max(_point_lights.size(), size_t(1)));
-        {
-            auto mapping = light_buffer.map(AccessType::WriteOnly);
-            for (size_t i = 0; i != _point_lights.size(); ++i)
-            {
-                const auto& light = _point_lights[i];
-                mapping[i] = { light.position(), light.radius(), light.color(), 0.0f };
-            }
-        }
-        light_buffer.bind(BufferUsage::Storage, 1);
-
-        // Bind envmap
-        DEBUG_ASSERT(_envmap && !_envmap->is_null());
-        _envmap->bind(4);
-
-        // Bind brdf lut needed for lighting to scene rendering shaders
-        brdf_lut().bind(5);
-
-        // Render the sky
-        _sky_material.bind(false, nullptr);
-        _sky_material.set_uniform(HASH("intensity"), _ibl_intensity);
-        draw_full_screen_triangle();
-
-        const Frustum frustum = _camera.build_frustum();
-        const glm::vec3 cam_pos = _camera.position();
-
-        // Render every object
-        {
-            // Opaque first
-            for (const SceneObject& obj : _objects)
-            {
-                if (obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))
+                auto mapping = light_buffer.map(AccessType::WriteOnly);
+                for (size_t i = 0; i != _point_lights.size(); ++i)
                 {
-                    obj.render(true, nullptr);
+                    const auto& light = _point_lights[i];
+                    mapping[i] = { light.position(), light.radius(), light.color(), 0.0f };
                 }
             }
+            light_buffer.bind(BufferUsage::Storage, 1);
 
-            // Transparent after
+            DEBUG_ASSERT(_envmap && !_envmap->is_null());
+            _envmap->bind(4);
+            brdf_lut().bind(5);
+        }
+
+        if (pass == RenderPass::Lighting)
+        {
+            program->bind();
+            draw_full_screen_triangle();
+            return;
+        }
+
+        if (pass == RenderPass::Forward)
+        {
+            _sky_material.bind(false, nullptr);
+            _sky_material.set_uniform(HASH("intensity"), _ibl_intensity);
+            draw_full_screen_triangle();
+        }
+
+        const bool cull = pass != RenderPass::Shadow;
+        const Frustum frustum = _camera.build_frustum();
+        const glm::vec3 cam_pos = _camera.position();
+
+        for (const SceneObject& obj : _objects)
+        {
+            if (obj.material().is_opaque() && (!cull || obj.is_in_frustum(cam_pos, frustum)))
+            {
+                obj.render(pass == RenderPass::Forward, program);
+            }
+        }
+
+        if (pass == RenderPass::Forward)
+        {
             for (const SceneObject& obj : _objects)
             {
                 if (!obj.material().is_opaque() && obj.is_in_frustum(cam_pos, frustum))

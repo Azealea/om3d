@@ -563,14 +563,14 @@ int main(int argc, char** argv)
                 PROFILE_GPU("Shadow pass");
 
                 renderer.shadow_framebuffer.bind(true, false);
-                scene->render_shadow_map(*z_prepass_program);
+                scene->render(RenderPass::Shadow, z_prepass_program.get());
             }
 
             {
                 PROFILE_GPU("G-buffer pass");
 
                 renderer.gbuffer_framebuffer.bind(true, true);
-                scene->render_gbuffer(*gbuffer_program);
+                scene->render(RenderPass::GBuffer, gbuffer_program.get());
             }
 
             {
@@ -581,7 +581,7 @@ int main(int argc, char** argv)
                 renderer.gbuffer_normal_metal_texture.bind(1);
                 renderer.depth_texture.bind(2);
                 renderer.shadow_texture.bind(6);
-                scene->render_lighting(*lighting_program);
+                scene->render(RenderPass::Lighting, lighting_program.get());
             }
 
             {

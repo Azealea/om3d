@@ -12,6 +12,15 @@
 namespace OM3D
 {
 
+    enum class RenderPass
+    {
+        Shadow,
+        ZPrepass,
+        GBuffer,
+        Lighting,
+        Forward,
+    };
+
     class Scene : NonMovable
     {
     public:
@@ -19,11 +28,7 @@ namespace OM3D
 
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
 
-        void render() const;
-        void prerender(Program& program) const;
-        void render_gbuffer(Program& program) const;
-        void render_lighting(Program& program) const;
-        void render_shadow_map(Program& program) const;
+        void render(RenderPass pass, Program* program) const;
 
         BSphere bounding_sphere() const;
         glm::mat4 sun_view_proj() const;
