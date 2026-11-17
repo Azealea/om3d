@@ -590,11 +590,8 @@ namespace OM3D
                             mat->set_texture(3u, emissive);
                         }
 
-                        if (alpha_test)
-                        {
-                            mat->set_stored_uniform(HASH("alpha_cutoff"),
-                                                    float(gltf_mat.alphaCutoff));
-                        }
+                        mat->set_stored_uniform(HASH("alpha_cutoff"),
+                                                alpha_test ? float(gltf_mat.alphaCutoff) : -1.0f);
 
                         mat->set_double_sided(gltf_mat.doubleSided);
 

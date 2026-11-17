@@ -18,10 +18,16 @@ layout(binding = 2) uniform sampler2D in_metal_rough;
 
 uniform vec3 base_color_factor;
 uniform vec2 metal_rough_factor;
+uniform float alpha_cutoff;
 
 void main()
 {
     vec4 albedo_tex = texture(in_texture, in_uv);
+
+    if(albedo_tex.a <= alpha_cutoff)
+    {
+        discard;
+    }
 
     vec3 normal_map = unpack_normal_map(texture(in_normal_texture, in_uv).xy);
     vec3 normal = normalize(normal_map.x * in_tangent +
