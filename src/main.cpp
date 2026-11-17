@@ -581,6 +581,7 @@ int main(int argc, char** argv)
                 renderer.depth_texture.bind(2);
                 renderer.shadow_texture.bind(6);
                 scene->render(RenderPass::Lighting, nullptr);
+                scene->render(RenderPass::PointLights, nullptr);
             }
 
             {

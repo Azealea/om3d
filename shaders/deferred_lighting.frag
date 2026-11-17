@@ -20,11 +20,6 @@ layout(binding = 0) uniform Data
     FrameData frame;
 };
 
-layout(binding = 1) buffer PointLights
-{
-    PointLight point_lights[];
-};
-
 void main()
 {
     const ivec2 coord = ivec2(gl_FragCoord.xy);
@@ -66,22 +61,6 @@ void main()
     shadow /= 9.0;
 
     acc += shadow * frame.sun_color * eval_brdf(normal, view_dir, frame.sun_dir, base_color, metal, roughness);
-
-    for(uint i = 0; i != frame.point_light_count; i++)
-    {
-        PointLight light = point_lights[i];
-        vec3 to_light = (light.position - position);
-        float dist = length(to_light);
-        vec3 light_vec = to_light / dist;
-
-        float att = attenuation(dist, light.radius);
-        if(att <= 0.0f)
-        {
-            continue;
-        }
-
-        acc += eval_brdf(normal, view_dir, light_vec, base_color, metal, roughness) * att * light.color;
-    }
 
     out_color = vec4(acc, 1.0);
 }

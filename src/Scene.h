@@ -18,6 +18,7 @@ namespace OM3D
         ZPrepass,
         GBuffer,
         Lighting,
+        PointLights,
         Forward,
     };
 
@@ -60,6 +61,7 @@ namespace OM3D
         float _ibl_intensity = 1.0f;
         Material _sky_material;
         Material _sun_material;
+        Material _point_light_material;
 
         Camera _camera;
     };

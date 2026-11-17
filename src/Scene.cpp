@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include <cmath>
+#include <glad/gl.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <limits>
 
@@ -18,6 +19,11 @@ namespace OM3D
         _sun_material.set_program(Program::from_files("deferred_lighting.frag", "screen.vert"));
         _sun_material.set_depth_test_mode(DepthTestMode::None);
         _sun_material.set_depth_write(false);
+
+        _point_light_material.set_program(Program::from_files("deferred_point.frag", "screen.vert"));
+        _point_light_material.set_blend_mode(BlendMode::Additive);
+        _point_light_material.set_depth_test_mode(DepthTestMode::None);
+        _point_light_material.set_depth_write(false);
 
         _envmap = std::make_shared<Texture>(Texture::empty_cubemap(4, ImageFormat::RGBA8_UNORM));
     }
@@ -111,7 +117,8 @@ namespace OM3D
 
     void Scene::render(RenderPass pass, Program* program) const
     {
-        const bool lit = pass == RenderPass::Lighting || pass == RenderPass::Forward;
+        const bool lit = pass == RenderPass::Lighting || pass == RenderPass::PointLights
+                         || pass == RenderPass::Forward;
 
         TypedBuffer<shader::FrameData> buffer(nullptr, 1);
         {
@@ -162,6 +169,18 @@ namespace OM3D
         {
             _sun_material.bind(false, nullptr);
             draw_full_screen_triangle();
+            return;
+        }
+
+        if (pass == RenderPass::PointLights)
+        {
+            Program& light_program = _point_light_material.bind(false, nullptr);
+            for (size_t i = 0; i != _point_lights.size(); ++i)
+            {
+                light_program.set_uniform(HASH("light_index"), u32(i));
+                draw_full_screen_triangle();
+            }
+            glDisable(GL_BLEND);
             return;
         }
 
