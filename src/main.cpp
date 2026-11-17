@@ -457,9 +457,12 @@ struct RendererState
                 Texture(size, ImageFormat::RGBA8_sRGB, WrapMode::Clamp);
             state.gbuffer_normal_metal_texture =
                 Texture(size, ImageFormat::RGBA8_UNORM, WrapMode::Clamp);
+            state.gbuffer_emissive_texture =
+                Texture(size, ImageFormat::RGBA16_FLOAT, WrapMode::Clamp);
             state.gbuffer_framebuffer =
                 Framebuffer(&state.depth_texture, std::array{ &state.gbuffer_albedo_rough_texture,
-                                                              &state.gbuffer_normal_metal_texture });
+                                                              &state.gbuffer_normal_metal_texture,
+                                                              &state.gbuffer_emissive_texture });
 
             // Result of the debug shader, copied to the screen afterwards
             state.debug_texture = Texture(size, ImageFormat::RGBA8_UNORM, WrapMode::Clamp);
@@ -481,6 +484,7 @@ struct RendererState
 
     Texture gbuffer_albedo_rough_texture;
     Texture gbuffer_normal_metal_texture;
+    Texture gbuffer_emissive_texture;
     Texture debug_texture;
 
     Framebuffer gbuffer_framebuffer;
@@ -579,6 +583,7 @@ int main(int argc, char** argv)
                 renderer.gbuffer_albedo_rough_texture.bind(0);
                 renderer.gbuffer_normal_metal_texture.bind(1);
                 renderer.depth_texture.bind(2);
+                renderer.gbuffer_emissive_texture.bind(3);
                 renderer.shadow_texture.bind(6);
                 scene->render(RenderPass::Lighting, nullptr);
                 scene->render(RenderPass::PointLights, nullptr);

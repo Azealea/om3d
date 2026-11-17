@@ -10,6 +10,7 @@ layout(location = 0) in vec2 in_uv;
 layout(binding = 0) uniform sampler2D in_albedo_rough;
 layout(binding = 1) uniform sampler2D in_normal_metal;
 layout(binding = 2) uniform sampler2D in_depth;
+layout(binding = 3) uniform sampler2D in_emissive;
 
 layout(binding = 4) uniform samplerCube in_envmap;
 layout(binding = 5) uniform sampler2D brdf_lut;
@@ -44,7 +45,8 @@ void main()
 
     vec3 view_dir = normalize(frame.camera.position - position);
 
-    vec3 acc = eval_ibl(in_envmap, brdf_lut, normal, view_dir, base_color, metal, roughness) * frame.ibl_intensity;
+    vec3 acc = texelFetch(in_emissive, coord, 0).rgb;
+    acc += eval_ibl(in_envmap, brdf_lut, normal, view_dir, base_color, metal, roughness) * frame.ibl_intensity;
 
     vec4 sun_clip = frame.sun_view_proj * vec4(position + frame.sun_dir * frame.sun_bias, 1.0);
     vec2 shadow_uv = sun_clip.xy * 0.5 + 0.5;

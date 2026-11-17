@@ -4,6 +4,7 @@
 
 layout(location = 0) out vec4 out_albedo_rough;
 layout(location = 1) out vec4 out_normal_metal;
+layout(location = 2) out vec4 out_emissive;
 
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec2 in_uv;
@@ -15,10 +16,12 @@ layout(location = 5) in vec3 in_bitangent;
 layout(binding = 0) uniform sampler2D in_texture;
 layout(binding = 1) uniform sampler2D in_normal_texture;
 layout(binding = 2) uniform sampler2D in_metal_rough;
+layout(binding = 3) uniform sampler2D in_emissive;
 
 uniform vec3 base_color_factor;
 uniform vec2 metal_rough_factor;
 uniform float alpha_cutoff;
+uniform vec3 emissive_factor;
 
 void main()
 {
@@ -42,4 +45,5 @@ void main()
 
     out_albedo_rough = vec4(base_color, roughness);
     out_normal_metal = vec4(normal * 0.5 + 0.5, metal);
+    out_emissive = vec4(texture(in_emissive, in_uv).rgb * emissive_factor, 1.0);
 }
