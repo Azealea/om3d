@@ -23,6 +23,7 @@ static float sun_intensity = 7.0f;
 static float sun_bias = 0.3f;
 static float ibl_intensity = 1.0f;
 static float exposure = 0.33f;
+static int gbuffer_debug_mode = 0;
 
 static std::unique_ptr<Scene> scene;
 static std::shared_ptr<Texture> envmap;
@@ -270,6 +271,13 @@ void gui(ImGuiRenderer& imgui)
             ImGui::DragFloat("Sun Bias", &sun_bias, 0.001f, 0.0f, 1.0f, "%.3f");
             scene->set_sun_bias(sun_bias);
 
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("G-buffer"))
+        {
+            const char* modes[] = { "Depth", "Albedo", "Normal", "Roughness", "Metalness" };
+            ImGui::Combo("Debug view", &gbuffer_debug_mode, modes, IM_ARRAYSIZE(modes));
             ImGui::EndMenu();
         }
 
@@ -594,7 +602,7 @@ int main(int argc, char** argv)
                 renderer.gbuffer_normal_metal_texture.bind(1);
                 renderer.depth_texture.bind(2);
                 gbuffer_debug_program->bind();
-                gbuffer_debug_program->set_uniform(HASH("mode"), u32(0));
+                gbuffer_debug_program->set_uniform(HASH("mode"), u32(gbuffer_debug_mode));
                 draw_full_screen_triangle();
             }
 
