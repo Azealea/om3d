@@ -33,6 +33,8 @@ namespace OM3D
         std::shared_ptr<Material> _material;
     };
 
+    bool sphere_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum, const BSphere& sphere);
+
 } // namespace OM3D
 
 #endif // SCENEOBJECT_H

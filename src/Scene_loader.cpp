@@ -366,36 +366,60 @@ namespace OM3D
         }
     }
 
+    static bool load_gltf_model(const std::string& file_name, tinygltf::Model& gltf)
+    {
+        tinygltf::TinyGLTF ctx;
+        std::string err;
+        std::string warn;
+
+        const bool is_ascii = ends_with(file_name, ".gltf");
+        const bool ok = is_ascii ? ctx.LoadASCIIFromFile(&gltf, &err, &warn, file_name)
+                                 : ctx.LoadBinaryFromFile(&gltf, &err, &warn, file_name);
+
+        if (!err.empty())
+        {
+            std::cerr << "Error while loading gltf: " << err << std::endl;
+        }
+        if (!warn.empty())
+        {
+            std::cerr << "Warning while loading gltf: " << warn << std::endl;
+        }
+
+        return ok;
+    }
+
+    Result<MeshData> Scene::mesh_from_gltf(const std::string& file_name)
+    {
+        tinygltf::Model gltf;
+        if (!load_gltf_model(file_name, gltf))
+        {
+            return { false, {} };
+        }
+
+        for (const tinygltf::Mesh& mesh : gltf.meshes)
+        {
+            for (const tinygltf::Primitive& prim : mesh.primitives)
+            {
+                if (prim.mode == TINYGLTF_MODE_TRIANGLES)
+                {
+                    return build_mesh_data(gltf, prim);
+                }
+            }
+        }
+
+        return { false, {} };
+    }
+
     Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name)
     {
         const double time = program_time();
         DEFER(std::cout << file_name << " loaded in "
                         << std::round((program_time() - time) * 100.0) / 100.0 << "s" << std::endl);
 
-        tinygltf::TinyGLTF ctx;
         tinygltf::Model gltf;
-
+        if (!load_gltf_model(file_name, gltf))
         {
-            std::string err;
-            std::string warn;
-
-            const bool is_ascii = ends_with(file_name, ".gltf");
-            const bool ok = is_ascii ? ctx.LoadASCIIFromFile(&gltf, &err, &warn, file_name)
-                                     : ctx.LoadBinaryFromFile(&gltf, &err, &warn, file_name);
-
-            if (!err.empty())
-            {
-                std::cerr << "Error while loading gltf: " << err << std::endl;
-            }
-            if (!warn.empty())
-            {
-                std::cerr << "Warning while loading gltf: " << warn << std::endl;
-            }
-
-            if (!ok)
-            {
-                return { false, {} };
-            }
+            return { false, {} };
         }
 
         std::cout << file_name << " parsed in "

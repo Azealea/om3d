@@ -63,8 +63,11 @@ namespace OM3D
 
     bool SceneObject::is_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum) const
     {
-        const BSphere sphere = scene_bounding_sphere();
+        return sphere_in_frustum(cam_pos, frustum, scene_bounding_sphere());
+    }
 
+    bool sphere_in_frustum(const glm::vec3& cam_pos, const Frustum& frustum, const BSphere& sphere)
+    {
         for (const glm::vec3& normal :
              { frustum._near_normal, frustum._top_normal, frustum._bottom_normal,
                frustum._right_normal, frustum._left_normal })

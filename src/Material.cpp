@@ -34,6 +34,11 @@ namespace OM3D
         _depth_write = depth_write;
     }
 
+    void Material::set_cull_front_faces(bool cull_front_faces)
+    {
+        _cull_front_faces = cull_front_faces;
+    }
+
     void Material::set_texture(u32 slot, std::shared_ptr<Texture> tex)
     {
         if (const auto it = std::find_if(_textures.begin(), _textures.end(),
@@ -70,7 +75,13 @@ namespace OM3D
     {
         Program& program_to_run = program_override ? *program_override : *_program;
 
-        if (is_opaque() && _double_sided == false)
+        if (_cull_front_faces)
+        {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            glFrontFace(GL_CCW);
+        }
+        else if (is_opaque() && _double_sided == false)
         {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);

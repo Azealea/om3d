@@ -28,6 +28,7 @@ namespace OM3D
         Scene();
 
         static Result<std::unique_ptr<Scene>> from_gltf(const std::string& file_name);
+        static Result<MeshData> mesh_from_gltf(const std::string& file_name);
 
         void render(RenderPass pass, Program* program) const;
 
@@ -62,6 +63,7 @@ namespace OM3D
         Material _sky_material;
         Material _sun_material;
         Material _point_light_material;
+        StaticMesh _light_sphere;
 
         Camera _camera;
     };

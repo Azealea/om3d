@@ -34,6 +34,7 @@ namespace OM3D
         void set_depth_test_mode(DepthTestMode depth);
         void set_double_sided(bool double_sided);
         void set_depth_write(bool depth_write);
+        void set_cull_front_faces(bool cull_front_faces);
         void set_texture(u32 slot, std::shared_ptr<Texture> tex);
 
         bool is_opaque() const;
@@ -63,6 +64,7 @@ namespace OM3D
         DepthTestMode _depth_test_mode = DepthTestMode::Standard;
         bool _double_sided = false;
         bool _depth_write = true;
+        bool _cull_front_faces = false;
     };
 
 } // namespace OM3D

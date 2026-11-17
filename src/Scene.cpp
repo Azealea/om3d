@@ -20,10 +20,15 @@ namespace OM3D
         _sun_material.set_depth_test_mode(DepthTestMode::None);
         _sun_material.set_depth_write(false);
 
-        _point_light_material.set_program(Program::from_files("deferred_point.frag", "screen.vert"));
+        _point_light_material.set_program(Program::from_files("deferred_point.frag", "basic.vert"));
         _point_light_material.set_blend_mode(BlendMode::Additive);
-        _point_light_material.set_depth_test_mode(DepthTestMode::None);
+        _point_light_material.set_depth_test_mode(DepthTestMode::Reversed);
         _point_light_material.set_depth_write(false);
+        _point_light_material.set_cull_front_faces(true);
+
+        const Result<MeshData> sphere = mesh_from_gltf(std::string(data_path) + "sphere.glb");
+        ALWAYS_ASSERT(sphere.is_ok, "Unable to load sphere.glb");
+        _light_sphere = StaticMesh(sphere.value);
 
         _envmap = std::make_shared<Texture>(Texture::empty_cubemap(4, ImageFormat::RGBA8_UNORM));
     }
@@ -174,13 +179,31 @@ namespace OM3D
 
         if (pass == RenderPass::PointLights)
         {
+            const Frustum frustum = _camera.build_frustum();
+            const glm::vec3 cam_pos = _camera.position();
+
             Program& light_program = _point_light_material.bind(false, nullptr);
             for (size_t i = 0; i != _point_lights.size(); ++i)
             {
+                const PointLight& light = _point_lights[i];
+
+                BSphere volume;
+                volume.center = light.position();
+                volume.radius = light.radius();
+                if (!sphere_in_frustum(cam_pos, frustum, volume))
+                {
+                    continue;
+                }
+
+                const glm::mat4 model = glm::translate(glm::mat4(1.0f), volume.center)
+                    * glm::scale(glm::mat4(1.0f), glm::vec3(volume.radius));
+
+                light_program.set_uniform(HASH("model"), model);
                 light_program.set_uniform(HASH("light_index"), u32(i));
-                draw_full_screen_triangle();
+                _light_sphere.draw();
             }
             glDisable(GL_BLEND);
+            glCullFace(GL_BACK);
             return;
         }
 
